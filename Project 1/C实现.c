@@ -132,17 +132,15 @@ void buildDictTree(int row,int col)
     sprintf(str,"%ld",target.power);
     int i;
     for(i=0;str[i]!='\0';i++){
-        if(headCopy->flags[str[i]-'0']){
-            headCopy = headCopy->links[str[i]-'0'];
-        }else{
+        if(!headCopy->flags[str[i]-'0']){
             headCopy->flags[str[i]-'0'] = 1;
             headCopy->links[str[i]-'0'] = (TrieNodePtr)malloc(sizeof(TrieNode));
-            headCopy = headCopy->links[str[i]-'0'];
             int j;
             for(j=0;j<DICT;j++)
                 headCopy->flags[j] = 0;
             headCopy->exist = 0;
         }
+        headCopy = headCopy->links[str[i]-'0'];
     }
     if(headCopy->exist)
         headCopy->current->coefficient += target.coefficient;
