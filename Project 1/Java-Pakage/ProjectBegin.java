@@ -53,7 +53,10 @@ public class ProjectBegin {
             if(i!=0)
                 System.out.print(",");
             PolyNodeCol temp = validTrie.getNodeAt(i);
-            System.out.print("("+temp.getCoefficient()+","+temp.getPower()+")");
+            int coefficient = temp.getCoefficient();
+            if(coefficient==0)
+                continue;
+            System.out.print("("+coefficient+","+temp.getPower()+")");
         }
         System.out.println("}");
 
