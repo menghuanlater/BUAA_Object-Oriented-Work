@@ -57,6 +57,9 @@ int main(void)
     for(i=0;i<indexDict;i++) {
         if(i!=0)
             putchar(',');
+        long coefficient = myNodes[i]->coefficient;
+        if(coefficient==0)
+            continue;
         printf("(%ld,%ld)", myNodes[i]->coefficient, myNodes[i]->power);
     }
     printf("}\n");
