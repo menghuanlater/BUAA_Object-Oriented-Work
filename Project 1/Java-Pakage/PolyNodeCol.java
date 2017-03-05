@@ -19,10 +19,13 @@ public class PolyNodeCol {
             this.power = Integer.parseInt(m.group(2));
         }
     }
-    public int getCoeffcient(){
+    public int getCoefficient(){
         return coefficient;
     }
     public int getPower(){
         return power;
+    }
+    public void addCoefficient(int add){
+        this.coefficient += add;
     }
 }

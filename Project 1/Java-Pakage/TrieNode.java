@@ -4,7 +4,7 @@ package core;
  * Created by ****** on 2017-03-05.
  */
 public class TrieNode {
-    private final int ARRAY_LENGTH = 10;
+    static final int ARRAY_LENGTH = 10;
     private boolean flags[] = new boolean[ARRAY_LENGTH];
     private TrieNode linkNodeArray[] = new TrieNode[ARRAY_LENGTH];
     private boolean exist;
