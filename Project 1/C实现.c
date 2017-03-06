@@ -7,7 +7,7 @@
 #define MAX_ROW 21
 #define MAX_COL 51
 #define DICT 10
-#define MAX_CHAR 20000//最大输入字符数
+#define MAX_CHAR 30000//最大输入字符数
 typedef struct
 {
     int flag;//存在标志
@@ -91,9 +91,17 @@ void initialMySets()
 }
 void getPoly()
 {
+    char targetString1[MAX_CHAR] = {'\0'};
     char targetString[MAX_CHAR] = {'\0'};
-    fgets(targetString,MAX_CHAR,stdin);
-    *(targetString+strlen(targetString)-1) = '\0';//消除换行符
+    fgets(targetString1,MAX_CHAR,stdin);
+    *(targetString1+strlen(targetString1)-1) = '\0';//消除换行符
+    int i,j=0;
+    for(i=0;*(targetString1+i)!='\0';i++){
+        if(*(targetString1+i)!=' ') {
+            *(targetString + j) = *(targetString1 + i);
+            j++;
+        }
+    }
     int minus;
     char * start;
     if(*targetString=='-') {
@@ -140,7 +148,7 @@ void buildDictTree(int row,int col)
             headCopy->links[str[i]-'0'] = (TrieNodePtr)malloc(sizeof(TrieNode));
             int j;
             for(j=0;j<DICT;j++)
-                headCopy->flags[j] = 0;
+                headCopy->links[str[i]-'0']->flags[j] = 0;
             headCopy->exist = 0;
         }
         headCopy = headCopy->links[str[i]-'0'];
