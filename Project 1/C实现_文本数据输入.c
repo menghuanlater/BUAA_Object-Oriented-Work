@@ -8,6 +8,8 @@
 #define MAX_COL 51
 #define DICT 10
 #define MAX_CHAR 30000//最大输入字符数
+#define EDGE 1000000
+#define STACK 5
 typedef struct
 {
     int flag;//存在标志
@@ -54,12 +56,16 @@ int main(void)
 
     quickSort(0,indexDict-1);
     putchar('{');
+    int comaFlag = 1;
     for(i=0;i<indexDict;i++) {
-        if(i!=0)
+        if(i!=0 && comaFlag)
             putchar(',');
         long coefficient = myNodes[i]->coefficient;
-        if(coefficient==0)
-            continue;
+        if(coefficient==0){
+			comaFlag = 0;
+			continue;
+		}
+		comaFlag = 1;
         printf("(%ld,%ld)", myNodes[i]->coefficient, myNodes[i]->power);
     }
     printf("}\n");
@@ -74,6 +80,7 @@ void outInputInfo()
     printf("下面是一个符合输入条件的例子!\n");
     printf("{(3,0), (2,2), (12,3)} + {(3,1), (-5,3)} - {(-199,2), (29,3),(10,7)}\n");
     printf("**********************************************************\n");
+    printf("请输入表达式:");
 }
 void initialMySets()
 {
@@ -91,14 +98,25 @@ void initialMySets()
 void getPoly()
 {
     FILE *in = fopen("text.txt","r");
+    if(in==NULL){
+        printf("Sorry,测试文件未找到!");
+        exit(EXIT_SUCCESS);
+    }
     char targetString1[MAX_CHAR] = {'\0'};
     char targetString[MAX_CHAR] = {'\0'};
     fgets(targetString1,MAX_CHAR*sizeof(char),in);
     fclose(in);
+    *(targetString1+strlen(targetString1)-1) = '\0';//消除换行符
     int i,j=0;
     for(i=0;*(targetString1+i)!='\0';i++){//消除所有的空格
-        if(*(targetString1+i)!=' ') {
-            *(targetString + j) = *(targetString1 + i);
+        char temp = *(targetString1+i);
+        if(!(temp==' '||temp=='{'||temp=='}'||temp=='('||temp==')'||temp=='+'||temp=='-'
+                ||temp==','||(temp>='0' && temp<='9'))){
+            printf("Sorry,多项式中出现不合法字符!");
+            exit(EXIT_SUCCESS);
+        }
+        if(temp!=' ') {
+            *(targetString + j) = temp;
             j++;
         }
     }
@@ -112,21 +130,56 @@ void getPoly()
     } else{
         minus = 1;start = targetString;
     }
+    char stack[STACK] = {'\0'};int top=-1;
     for(;start<targetString+strlen(targetString);start++){
         if(*start=='('){
             if(colCount>=50){
                 printf("Sorry,单个多项式数据对数过多!");
                 exit(EXIT_SUCCESS);
             }
+            if(top==-1){
+                printf("Sorry,检测到输入存在'(c,n)'数对不在'{}'里的情况!");
+                exit(EXIT_SUCCESS);
+            }else if(stack[top]=='('){
+                printf("Sorry,检测到输入存在'('不匹配的情况");
+                exit(EXIT_SUCCESS);
+            }else{
+                stack[++top] = *start;
+            }
             char *end;
             long coefficient = minus*strtol(start+1,&end,10);
+            if(*end!=','){
+                printf("存在不合法整数数据或者(c,n)为空!");
+                exit(EXIT_SUCCESS);
+            }else if(coefficient>=EDGE || coefficient<=-EDGE){
+                printf("存在系数数据越界!");
+                exit(EXIT_SUCCESS);
+            }else if(end==start+1){
+                printf("(c,n)中c不可以为空!");
+                exit(EXIT_SUCCESS);
+            }else if(*end==')'){
+                printf("Sorry,检测到存在数据对里只有一个数据的情况");
+                exit(EXIT_SUCCESS);
+            }
+            char *endCopy = end; 
             long power = strtol(end+1,&end,10);
+            if(*end!=')'){
+                printf("存在不合法整数数据");
+                exit(EXIT_SUCCESS);
+            }else if(power>=EDGE || power<0){
+                printf("存在指数数据越界!");
+                exit(EXIT_SUCCESS);
+            }else if(end==endCopy+1){
+                printf("(c,n)中n不可以为空!");
+                exit(EXIT_SUCCESS);
+            }
             mySets[rowCount][colCount].coefficient = coefficient;
             mySets[rowCount][colCount].power = power;
             mySets[rowCount][colCount].flag = 1;
-            start = end;
+            start = end - 1;
             colCount++;
         }else if(*start=='}'){
+            top = -1;
             if(rowCount>=20){
                 printf("Sorry,多项式数目过多!");
                 exit(EXIT_SUCCESS);
@@ -139,7 +192,23 @@ void getPoly()
                 minus = -1;
             else
                 continue;
+        }else if(*start=='{'){
+            if(top!=-1){
+                printf("Sorry,检测到输入存在'{'不匹配的情况!");
+                exit(EXIT_SUCCESS);
+            }else
+                stack[++top] = *start;
+        }else if(*start==')'){
+            if(stack[top]=='{'){
+                printf("Sorry,检测到输入存在')'不匹配问题!");
+                exit(EXIT_SUCCESS);
+            }else
+                top--;
         }
+    }
+    if(top!=-1){
+    	printf("Sorry,检测到输入存在'{'不匹配的情况!");
+	exit(EXIT_SUCCESS);
     }
     //读取实现，验证成功
 }
