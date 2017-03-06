@@ -120,7 +120,7 @@ void getPoly()
     } else{
         minus = 1;start = targetString;
     }
-    int flag = 0;char stack[STACK] = {'\0'};int top=-1;
+    char stack[STACK] = {'\0'};int top=-1;
     for(;start<targetString+strlen(targetString);start++){
         if(*start=='('){
             if(colCount>=50){
@@ -135,7 +135,6 @@ void getPoly()
                 exit(EXIT_SUCCESS);
             }else{
                 stack[++top] = *start;
-                flag = 1;
             }
             char *end;
             long coefficient = minus*strtol(start+1,&end,10);
@@ -145,7 +144,14 @@ void getPoly()
             }else if(coefficient>=EDGE || coefficient<=-EDGE){
                 printf("存在系数数据越界!");
                 exit(EXIT_SUCCESS);
+            }else if(end==start+1){
+                printf("(c,n)中c不可以为空!");
+                exit(EXIT_SUCCESS);
+            }else if(*end==')'){
+                printf("Sorry,检测到存在数据对里只有一个数据的情况");
+                exit(EXIT_SUCCESS);
             }
+            char *endCopy = end; 
             long power = strtol(end+1,&end,10);
             if(*end!=')'){
                 printf("存在不合法整数数据");
@@ -153,11 +159,14 @@ void getPoly()
             }else if(power>=EDGE || coefficient<0){
                 printf("存在指数数据越界!");
                 exit(EXIT_SUCCESS);
+            }else if(end==endCopy+1){
+                printf("(c,n)中n不可以为空!");
+                exit(EXIT_SUCCESS);
             }
             mySets[rowCount][colCount].coefficient = coefficient;
             mySets[rowCount][colCount].power = power;
             mySets[rowCount][colCount].flag = 1;
-            start = end;
+            start = end - 1;
             colCount++;
         }else if(*start=='}'){
             top = -1;
@@ -174,6 +183,17 @@ void getPoly()
             else
                 continue;
         }else if(*start=='{'){
+            if(top==-1){
+                printf("Sorry,检测到输入存在'{'不匹配的情况!");
+                exit(EXIT_SUCCESS);
+            }else
+                stack[++top] = *start;
+        }else if(*start==')'){
+            if(stack[top]=='{'){
+                printf("Sorry,检测到输入存在')'不匹配问题!");
+                exit(EXIT_SUCCESS);
+            }else
+                top--;
         }
     }
     //读取实现，验证成功
