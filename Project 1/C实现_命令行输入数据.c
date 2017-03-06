@@ -160,7 +160,7 @@ void getPoly()
             start = end;
             colCount++;
         }else if(*start=='}'){
-            
+            top = -1;
             if(rowCount>=20){
                 printf("Sorry,多项式数目过多!");
                 exit(EXIT_SUCCESS);
@@ -173,6 +173,7 @@ void getPoly()
                 minus = -1;
             else
                 continue;
+        }else if(*start=='{'){
         }
     }
     //读取实现，验证成功
