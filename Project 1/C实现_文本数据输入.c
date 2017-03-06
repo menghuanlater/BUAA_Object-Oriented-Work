@@ -74,7 +74,6 @@ void outInputInfo()
     printf("下面是一个符合输入条件的例子!\n");
     printf("{(3,0), (2,2), (12,3)} + {(3,1), (-5,3)} - {(-199,2), (29,3),(10,7)}\n");
     printf("**********************************************************\n");
-    printf("请输入表达式:");
 }
 void initialMySets()
 {
@@ -96,7 +95,6 @@ void getPoly()
     char targetString[MAX_CHAR] = {'\0'};
     fgets(targetString1,MAX_CHAR*sizeof(char),in);
     fclose(in);
-    *(targetString1+strlen(targetString1)-1) = '\0';//消除换行符
     int i,j=0;
     for(i=0;*(targetString1+i)!='\0';i++){//消除所有的空格
         if(*(targetString1+i)!=' ') {
