@@ -70,7 +70,7 @@ int main(void)
 void outInputInfo()
 {
     printf("**********************************************************\n");
-    printf("输入仅由 “ 0-9 + - , ( ) { } ” 这几种字符组成\n");
+    printf("输入仅由 “ 0-9 + - , ( ) { } ”与空格这几种字符组成\n");
     printf("下面是一个符合输入条件的例子!\n");
     printf("{(3,0), (2,2), (12,3)} + {(3,1), (-5,3)} - {(-199,2), (29,3),(10,7)}\n");
     printf("**********************************************************\n");
@@ -93,10 +93,10 @@ void getPoly()
 {
     char targetString1[MAX_CHAR] = {'\0'};
     char targetString[MAX_CHAR] = {'\0'};
-    fgets(targetString1,MAX_CHAR,stdin);
+    fgets(targetString1,MAX_CHAR*sizeof(char),stdin);
     *(targetString1+strlen(targetString1)-1) = '\0';//消除换行符
     int i,j=0;
-    for(i=0;*(targetString1+i)!='\0';i++){
+    for(i=0;*(targetString1+i)!='\0';i++){//消除所有的空格
         if(*(targetString1+i)!=' ') {
             *(targetString + j) = *(targetString1 + i);
             j++;
@@ -114,6 +114,10 @@ void getPoly()
     }
     for(;start<targetString+strlen(targetString);start++){
         if(*start=='('){
+            if(colCount>=50){
+                printf("Sorry,单个多项式数据对数过多!");
+                exit(EXIT_SUCCESS);
+            }
             char *end;
             long coefficient = minus*strtol(start+1,&end,10);
             long power = strtol(end+1,&end,10);
@@ -123,6 +127,10 @@ void getPoly()
             start = end;
             colCount++;
         }else if(*start=='}'){
+            if(rowCount>=20){
+                printf("Sorry,多项式数目过多!");
+                exit(EXIT_SUCCESS);
+            }
             rowCount++;
             colCount = 0;
             if(*(start+1)=='+')
@@ -149,7 +157,7 @@ void buildDictTree(int row,int col)
             int j;
             for(j=0;j<DICT;j++)
                 headCopy->links[str[i]-'0']->flags[j] = 0;
-            headCopy->exist = 0;
+            headCopy->links[str[i]-'0']->exist = 0;
         }
         headCopy = headCopy->links[str[i]-'0'];
     }
