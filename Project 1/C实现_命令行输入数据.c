@@ -56,12 +56,16 @@ int main(void)
 
     quickSort(0,indexDict-1);
     putchar('{');
+    int comaFlag = 1;
     for(i=0;i<indexDict;i++) {
-        if(i!=0)
+        if(i!=0 && comaFlag)
             putchar(',');
         long coefficient = myNodes[i]->coefficient;
-        if(coefficient==0)
-            continue;
+        if(coefficient==0){
+			comaFlag = 0;
+			continue;
+		}
+		comaFlag = 1;
         printf("(%ld,%ld)", myNodes[i]->coefficient, myNodes[i]->power);
     }
     printf("}\n");
@@ -139,7 +143,7 @@ void getPoly()
             char *end;
             long coefficient = minus*strtol(start+1,&end,10);
             if(*end!=','){
-                printf("存在不合法整数数据");
+                printf("存在不合法整数数据或者(c,n)为空!");
                 exit(EXIT_SUCCESS);
             }else if(coefficient>=EDGE || coefficient<=-EDGE){
                 printf("存在系数数据越界!");
@@ -156,7 +160,7 @@ void getPoly()
             if(*end!=')'){
                 printf("存在不合法整数数据");
                 exit(EXIT_SUCCESS);
-            }else if(power>=EDGE || coefficient<0){
+            }else if(power>=EDGE || power<0){
                 printf("存在指数数据越界!");
                 exit(EXIT_SUCCESS);
             }else if(end==endCopy+1){
@@ -183,7 +187,7 @@ void getPoly()
             else
                 continue;
         }else if(*start=='{'){
-            if(top==-1){
+            if(top!=-1){
                 printf("Sorry,检测到输入存在'{'不匹配的情况!");
                 exit(EXIT_SUCCESS);
             }else
