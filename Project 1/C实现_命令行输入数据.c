@@ -200,6 +200,10 @@ void getPoly()
                 top--;
         }
     }
+    if(top!=-1){
+    	printf("Sorry,检测到输入存在'{'不匹配的情况!");
+	exit(EXIT_SUCCESS);
+    }
     //读取实现，验证成功
 }
 void buildDictTree(int row,int col)
