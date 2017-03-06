@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
  * 正则匹配获取多项式的所有子项
  */
 public class GetPoly {
-    static final int MAX_ROW = 21;
+    static final int MAX_ROW = 20;
     private String expression;//规整表达式
     private PolyNodeRow[] polySetsRow = new PolyNodeRow[MAX_ROW];
     private int rowCount;
@@ -17,6 +17,9 @@ public class GetPoly {
 
     public GetPoly(String initExp){
         this.expression = initExp.replaceAll(" ","");//去除所有的空格
+        this.expression = this.expression.replaceAll("\\(,\\)","");//去除所有的(,)
+        this.expression = this.expression.replaceAll("\\(\\)","");//去除所有的()
+        this.expression = this.expression.replaceAll("\\{,*\\}","");//去除所有的{}
         this.isLegal = myCheck.isLegal(this.expression);
         this.rowCount = 0;
     }
@@ -28,6 +31,10 @@ public class GetPoly {
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(expression);
         while(m.find()){
+            if(rowCount==MAX_ROW){
+                System.out.println("Sorry,检测到输入的多项式过多!");
+                System.exit(0);
+            }
             polySetsRow[rowCount] = new PolyNodeRow();
             polySetsRow[rowCount].addPolyNode(m.group(0));
             rowCount++;
