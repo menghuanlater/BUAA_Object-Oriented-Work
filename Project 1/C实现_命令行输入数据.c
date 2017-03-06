@@ -8,6 +8,8 @@
 #define MAX_COL 51
 #define DICT 10
 #define MAX_CHAR 30000//最大输入字符数
+#define EDGE 1000000
+#define STACK 5
 typedef struct
 {
     int flag;//存在标志
@@ -97,8 +99,14 @@ void getPoly()
     *(targetString1+strlen(targetString1)-1) = '\0';//消除换行符
     int i,j=0;
     for(i=0;*(targetString1+i)!='\0';i++){//消除所有的空格
-        if(*(targetString1+i)!=' ') {
-            *(targetString + j) = *(targetString1 + i);
+        char temp = *(targetString1+i);
+        if(!(temp==' '||temp=='{'||temp=='}'||temp=='('||temp==')'||temp=='+'||temp=='-'
+                ||temp==','||(temp>='0' && temp<='9'))){
+            printf("Sorry,多项式中出现不合法字符!");
+            exit(EXIT_SUCCESS);
+        }
+        if(temp!=' ') {
+            *(targetString + j) = temp;
             j++;
         }
     }
@@ -112,21 +120,47 @@ void getPoly()
     } else{
         minus = 1;start = targetString;
     }
+    int flag = 0;char stack[STACK] = {'\0'};int top=-1;
     for(;start<targetString+strlen(targetString);start++){
         if(*start=='('){
             if(colCount>=50){
                 printf("Sorry,单个多项式数据对数过多!");
                 exit(EXIT_SUCCESS);
             }
+            if(top==-1){
+                printf("Sorry,检测到输入存在'(c,n)'数对不在'{}'里的情况!");
+                exit(EXIT_SUCCESS);
+            }else if(stack[top]=='('){
+                printf("Sorry,检测到输入存在'('不匹配的情况");
+                exit(EXIT_SUCCESS);
+            }else{
+                stack[++top] = *start;
+                flag = 1;
+            }
             char *end;
             long coefficient = minus*strtol(start+1,&end,10);
+            if(*end!=','){
+                printf("存在不合法整数数据");
+                exit(EXIT_SUCCESS);
+            }else if(coefficient>=EDGE || coefficient<=-EDGE){
+                printf("存在系数数据越界!");
+                exit(EXIT_SUCCESS);
+            }
             long power = strtol(end+1,&end,10);
+            if(*end!=')'){
+                printf("存在不合法整数数据");
+                exit(EXIT_SUCCESS);
+            }else if(power>=EDGE || coefficient<0){
+                printf("存在指数数据越界!");
+                exit(EXIT_SUCCESS);
+            }
             mySets[rowCount][colCount].coefficient = coefficient;
             mySets[rowCount][colCount].power = power;
             mySets[rowCount][colCount].flag = 1;
             start = end;
             colCount++;
         }else if(*start=='}'){
+            
             if(rowCount>=20){
                 printf("Sorry,多项式数目过多!");
                 exit(EXIT_SUCCESS);
