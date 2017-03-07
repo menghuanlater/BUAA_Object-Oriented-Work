@@ -116,13 +116,15 @@ void getPoly()
     }
     int minus;
     char * start;
-    if(*targetString=='-') {
-        minus = -1;start = targetString+1;
-    }
-    else if(*targetString=='+'){
-        minus = 1;start = targetString+1;
-    } else{
-        minus = 1;start = targetString;
+    int k=0;
+    while(*(targetString+k)!='+' && *(targetString+k)!='-')
+	k++;
+    if(k==0){
+    	minus = 1;start = targetString;
+    }else if(*(targetString+k-1)=='-') {
+        minus = -1;start = targetString+k;
+    }else if(*(targetString+k-1)=='+'){
+        minus = 1;start = targetString+k;
     }
     char stack[STACK] = {'\0'};int top=-1;
     for(;start<targetString+strlen(targetString);start++){
@@ -173,7 +175,11 @@ void getPoly()
             start = end - 1;
             colCount++;
         }else if(*start=='}'){
-            top = -1;
+            if(top!=-1){
+	    	printf("Sorry,检测到存在'}'不匹配的情况!");
+		exit(EXIT_SUCCESS);
+	    }else
+	        top=-1;
             if(rowCount>=20){
                 printf("Sorry,多项式数目过多!");
                 exit(EXIT_SUCCESS);
