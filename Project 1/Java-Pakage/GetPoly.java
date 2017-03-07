@@ -27,7 +27,7 @@ public class GetPoly {
         return this.isLegal;
     }
     public void setPolySetsRow(){
-        String pattern = "[+-]*\\{(.*?)\\}";
+        String pattern = "[+-]?\\{(.*?)\\}";
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(expression);
         while(m.find()){
