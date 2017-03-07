@@ -62,10 +62,10 @@ int main(void)
             putchar(',');
         long coefficient = myNodes[i]->coefficient;
         if(coefficient==0){
-			comaFlag = 0;
-			continue;
-		}
-		comaFlag = 1;
+            comaFlag = 0;
+            continue;
+        }
+        comaFlag = 1;
         printf("(%ld,%ld)", myNodes[i]->coefficient, myNodes[i]->power);
     }
     printf("}\n");
@@ -105,7 +105,7 @@ void getPoly()
     for(i=0;*(targetString1+i)!='\0';i++){//消除所有的空格
         char temp = *(targetString1+i);
         if(!(temp==' '||temp=='{'||temp=='}'||temp=='('||temp==')'||temp=='+'||temp=='-'
-                ||temp==','||(temp>='0' && temp<='9'))){
+             ||temp==','||(temp>='0' && temp<='9'))){
             printf("Sorry,多项式中出现不合法字符!");
             exit(EXIT_SUCCESS);
         }
@@ -117,10 +117,10 @@ void getPoly()
     int minus;
     char * start;
     int k=0;
-    while(*(targetString+k)!='+' && *(targetString+k)!='-')
-	k++;
+    while(*(targetString+k)=='+' || *(targetString+k)=='-')
+        k++;
     if(k==0){
-    	minus = 1;start = targetString;
+        minus = 1;start = targetString;
     }else if(*(targetString+k-1)=='-') {
         minus = -1;start = targetString+k;
     }else if(*(targetString+k-1)=='+'){
@@ -157,7 +157,7 @@ void getPoly()
                 printf("Sorry,检测到存在数据对里只有一个数据的情况");
                 exit(EXIT_SUCCESS);
             }
-            char *endCopy = end; 
+            char *endCopy = end;
             long power = strtol(end+1,&end,10);
             if(*end!=')'){
                 printf("存在不合法整数数据");
@@ -175,11 +175,11 @@ void getPoly()
             start = end - 1;
             colCount++;
         }else if(*start=='}'){
-            if(top!=-1){
-	    	printf("Sorry,检测到存在'}'不匹配的情况!");
-		exit(EXIT_SUCCESS);
-	    }else
-	        top=-1;
+            if(top==-1){
+                printf("Sorry,检测到存在'{'缺失的情况!");
+                exit(EXIT_SUCCESS);
+            }else
+                top=-1;
             if(rowCount>=20){
                 printf("Sorry,多项式数目过多!");
                 exit(EXIT_SUCCESS);
@@ -199,7 +199,10 @@ void getPoly()
             }else
                 stack[++top] = *start;
         }else if(*start==')'){
-            if(stack[top]=='{'){
+            if(top==-1) {
+                printf("Sorry,检测到输入存在括号缺失的情况!");
+                exit(EXIT_SUCCESS);
+            }else if(stack[top]=='{'){
                 printf("Sorry,检测到输入存在')'不匹配问题!");
                 exit(EXIT_SUCCESS);
             }else
@@ -207,8 +210,8 @@ void getPoly()
         }
     }
     if(top!=-1){
-    	printf("Sorry,检测到输入存在'{'不匹配的情况!");
-	exit(EXIT_SUCCESS);
+        printf("Sorry,检测到输入存在括号缺失的情况!");
+        exit(EXIT_SUCCESS);
     }
     //读取实现，验证成功
 }
