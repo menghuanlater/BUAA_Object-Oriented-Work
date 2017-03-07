@@ -60,7 +60,10 @@ public class CheckInputExp {
                 System.out.println("Sorry,检测到输入的数对'(c,n)'存在','分隔符缺失的情况!");
                 return true;
             }else if(!flag && target==')'){//小括号内有逗号并检测到右小括号
-                if(stack[top]=='{'){
+                if(top==-1){
+                    System.out.println("Sorry,检测到存在括号缺失的情况!");
+                    return true;
+                }else if(stack[top]=='{'){
                     System.out.println("Sorry,检测到输入存在')'不匹配的情况!");
                     return true;
                 }else
@@ -68,7 +71,7 @@ public class CheckInputExp {
             }
         }
         if(top!=-1){
-            System.out.println("Sorry,检测到输入存在右括号缺失的情况!");
+            System.out.println("Sorry,检测到输入存在括号缺失的情况!");
             return true;
         }
         return false;
