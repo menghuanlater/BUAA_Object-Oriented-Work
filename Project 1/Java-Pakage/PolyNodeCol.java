@@ -8,8 +8,8 @@ import java.util.regex.Pattern;
  * 多项式一个子项结点
  */
 public class PolyNodeCol {
-    private final int MAX_VALUE = 100000;
-    private final int MIN_VALUE = -100000;
+    private final int MAX_VALUE = 1000000;
+    private final int MIN_VALUE = -1000000;
     private int coefficient;//系数
     private int power;//指数
     public PolyNodeCol(String target,int minus){
