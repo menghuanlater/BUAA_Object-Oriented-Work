@@ -65,7 +65,7 @@ public class ProjectBegin {
             }
             System.out.println("}");
         }catch (Exception e){
-            System.out.println("输入数据过于长,程序退出!");
+            System.out.println("输入数据过于长或者输入了ctrl-z,程序退出!");
         }
         bufferedReader.close();
     }
