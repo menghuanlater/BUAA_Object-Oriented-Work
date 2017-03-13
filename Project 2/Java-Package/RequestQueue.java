@@ -9,7 +9,6 @@ import java.util.List;
 public class RequestQueue {
     private List<String> requestSets = null; //request set for initial version
     private int indexOfFetch;
-    private final String LIMIT_INFO = "NULL";
     public RequestQueue(){
         requestSets = new ArrayList<>();
         indexOfFetch = 0;
@@ -18,10 +17,21 @@ public class RequestQueue {
         this.requestSets.add(request);
     }
     public String getRequestNext(){
-        if(indexOfFetch<requestSets.size()) {
-            return requestSets.get(indexOfFetch++);
-        }else{
-            return LIMIT_INFO;
-        }
+        return requestSets.get(indexOfFetch++);
+    }
+    public boolean haveNext(){
+        return indexOfFetch < requestSets.size();
+    }
+    public int getIndexOfFetch(){
+        return indexOfFetch;
+    }
+    public int getSizeOfQueue(){
+        return requestSets.size();
+    }
+    public String getRequestAt(int position){
+        return requestSets.get(position);
+    }
+    public void delRequestAt(int position){
+        requestSets.remove(position);
     }
 }
