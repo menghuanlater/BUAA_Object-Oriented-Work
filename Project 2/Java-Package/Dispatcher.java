@@ -29,8 +29,8 @@ public class Dispatcher {
             //deal the first not start at 0
             if(isFirst){
                 if(request.getRequestTime()!=0){
-                    System.out.println("The first Legal request is not start at 0,the program exit.");
-                    System.exit(0);
+                    Main.illegalMessage.add("The first Legal request is not start at 0,the program exit.");
+                    Main.outIllegalMessage();
                 }else
                     isFirst = false;
             }
@@ -68,14 +68,14 @@ public class Dispatcher {
                 if((objRequest.getMoveType()==1 && targetRequest.getMoveType()==1) ||
                         (objRequest.getMoveType()==2 && targetRequest.getMoveType()==2)){//-->UP || DOWN
                     if(objRequest.getTargetFloor()==targetRequest.getTargetFloor()){//same floor
-                        System.out.println(request+" is redundant,the program will ignore this request.");
+                        Main.illegalMessage.add(request+" is redundant,the program will ignore this request.");
                         requestQueue.delRequestAt(loopStart);
                         loopStart--;
                     }
                 }
             }else if(objRequest.getRequestType()==1 && targetRequest.getRequestType()==1){//--> ER
                 if(objRequest.getTargetFloor()==targetRequest.getTargetFloor()){
-                    System.out.println(request+" is redundant,the program will ignore this request.");
+                    Main.illegalMessage.add(request+" is redundant,the program will ignore this request.");
                     requestQueue.delRequestAt(loopStart);
                     loopStart--;
                 }

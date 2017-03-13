@@ -54,7 +54,7 @@ public class SingleRequest implements ElevatorConstant{
     }
     //if the request is illegal,will carry out this function.
     private void errorBuild(String request){
-        System.out.println(request+" is illegal, the program will ignore this request.");
+        Main.illegalMessage.add(request+" is illegal, the program will ignore this request.");
         requestType = 0;
         moveType = 0;
         requestTime = -1;
