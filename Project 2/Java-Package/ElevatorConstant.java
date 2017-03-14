@@ -13,4 +13,5 @@ public interface ElevatorConstant {
     final int ER_ARGS = 3;
     final int FR_ARGS = 4;
     final double openCloseInterval = 1.0;//interval time
+    final double MAX_REQUEST_TIME = (double) (Integer.MAX_VALUE)*2+1;
 }

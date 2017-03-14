@@ -1,5 +1,7 @@
 package core;
 
+import java.text.DecimalFormat;
+
 /**
  * Created on 2017-03-13.
  */
@@ -10,12 +12,14 @@ public class Elevator implements ElevatorConstant{
     private double completeTime;//target time
     private int moveDire;//move direction
     private SingleRequest completeRequest;
+    private DecimalFormat decimalFormat;
     public Elevator() {
         startFloor = 1;
         startTime = 0.0; //just for initial
         completeTime = 0.0;
         moveDire = 0;
         completeRequest = null;
+        decimalFormat = new DecimalFormat(".0");
     }
     public void setCompleteRequest(SingleRequest completeRequest){
         if(this.completeRequest!=null)
@@ -43,11 +47,11 @@ public class Elevator implements ElevatorConstant{
         if(completeTime==0.0)
             return;
         else if(moveDire==0){
-            System.out.println("("+completeRequest.getTargetFloor()+",STILL,"+completeTime+")");
+            System.out.println("("+completeRequest.getTargetFloor()+",STILL,"+decimalFormat.format(completeTime)+")");
         }else if(moveDire==1){
-            System.out.println("("+completeRequest.getTargetFloor()+",UP,"+(completeTime-1.0)+")");
+            System.out.println("("+completeRequest.getTargetFloor()+",UP,"+decimalFormat.format(completeTime-1.0)+")");
         }else if(moveDire==2){
-            System.out.println("("+completeRequest.getTargetFloor()+",DOWN,"+(completeTime-1.0)+")");
+            System.out.println("("+completeRequest.getTargetFloor()+",DOWN,"+decimalFormat.format(completeTime-1.0)+")");
         }
     }
     public double getCompleteTime(){

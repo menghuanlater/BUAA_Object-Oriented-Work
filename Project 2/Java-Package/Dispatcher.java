@@ -7,13 +7,14 @@ package core;
 public class Dispatcher {
     private Elevator myElevator;
     private RequestQueue requestQueue;
+
     public Dispatcher(RequestQueue requestQueue){
         myElevator = new Elevator();
         this.requestQueue = requestQueue;
     }
     //this function is the most important task.
     public void carryOutTheElevator(){
-        int beforeRequestTime = 0;
+        long beforeRequestTime = 0;
         boolean isFirst = true;
         while(requestQueue.haveNext()){
             checkSameRequest(beforeRequestTime);//check later,reset beforeRequestTime
@@ -42,12 +43,12 @@ public class Dispatcher {
         }
         myElevator.outPut();
     }
-    private void checkSameRequest(int time){
+    private void checkSameRequest(long time){
         int loopStart = requestQueue.getIndexOfFetch();
         SingleRequest objRequest = myElevator.getCompleteRequest();
         SingleRequest targetRequest;
         double completeTime = myElevator.getCompleteTime();
-        int beforeRequestTime = time;
+        long beforeRequestTime = time;
         String request;
 
         if(objRequest==null)

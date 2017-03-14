@@ -6,11 +6,11 @@ package core;
 public class SingleRequest implements ElevatorConstant{
     private int requestType; //type--> if 0, illegal, if 1 ER, if 2 FR
     private int moveType; //type---> if 0,illegal, if 1 UP, if 2 DOWN
-    private int requestTime;// time
+    private long requestTime;// time
     private int targetFloor;
     private boolean legalRequest = true;
 
-    public SingleRequest(String request,int beforeRequestTime){ //include check legacy
+    public SingleRequest(String request,long beforeRequestTime){ //include check legacy
         if(request.length()==0){
             legalRequest = false;
         }else if(request.charAt(0)!='(' || request.charAt(request.length()-1)!=')'){
@@ -21,7 +21,7 @@ public class SingleRequest implements ElevatorConstant{
                 try{
                     requestType = 1;
                     targetFloor = Integer.parseInt(args[1]);
-                    requestTime = Integer.parseInt(args[2]);
+                    requestTime = Long.parseLong(args[2]);
                     if(!checkFloorAndTimeLegacy(targetFloor,requestTime,beforeRequestTime)){
                         errorBuild(request);
                     }
@@ -32,7 +32,7 @@ public class SingleRequest implements ElevatorConstant{
                 try{
                     requestType = 2;
                     targetFloor = Integer.parseInt(args[1]);
-                    requestTime = Integer.parseInt(args[3]);
+                    requestTime = Long.parseLong(args[3]);
                     if(!checkFloorAndTimeLegacy(targetFloor,requestTime,beforeRequestTime)){
                         errorBuild(request);
                         return;
@@ -62,8 +62,8 @@ public class SingleRequest implements ElevatorConstant{
         legalRequest = false;
     }
     //to check whether floor and time is legal
-    private boolean checkFloorAndTimeLegacy(int floor,int time,int beforeRequestTime){
-        if(floor>MAX_FLOOR || floor<MIN_FLOOR || time<0 || time<beforeRequestTime){
+    private boolean checkFloorAndTimeLegacy(int floor,Long time,Long beforeRequestTime){
+        if(floor>MAX_FLOOR || floor<MIN_FLOOR || time<0 || time<beforeRequestTime || time>MAX_REQUEST_TIME){
             return false;
         }else{
             return true;
@@ -78,7 +78,7 @@ public class SingleRequest implements ElevatorConstant{
     public int getMoveType(){
         return moveType;
     }
-    public int getRequestTime(){
+    public long getRequestTime(){
         return requestTime;
     }
     public boolean isLegalRequest(){
