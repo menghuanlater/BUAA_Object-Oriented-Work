@@ -19,7 +19,7 @@ public class Elevator implements ElevatorConstant{
         completeTime = 0.0;
         moveDire = 0;
         completeRequest = null;
-        decimalFormat = new DecimalFormat(".0");
+        decimalFormat = new DecimalFormat("0.0");
     }
     public void setCompleteRequest(SingleRequest completeRequest){
         if(this.completeRequest!=null)
