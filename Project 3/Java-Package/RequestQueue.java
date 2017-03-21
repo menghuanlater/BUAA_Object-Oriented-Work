@@ -7,16 +7,16 @@ import java.util.List;
  * Created on 2017-03-12.
  */
 class RequestQueue {
-    private List<String> requestSets = null; //request set for initial version
+    private List<SingleRequest> requestSets = null; //request set for initial version
     private int indexOfFetch;
     RequestQueue(){
         requestSets = new ArrayList<>();
         indexOfFetch = 0;
     }
-    void addRequest(String request){
+    void addRequest(SingleRequest request){
         this.requestSets.add(request);
     }
-    String getRequestNext(){
+    SingleRequest getRequestNext(){
         return requestSets.get(indexOfFetch++);
     }
     boolean haveNext(){
@@ -28,10 +28,16 @@ class RequestQueue {
     int getSizeOfQueue(){
         return requestSets.size();
     }
-    String getRequestAt(int position){
+    SingleRequest getRequestAt(int position){
         return requestSets.get(position);
     }
     void delRequestAt(int position){
         requestSets.remove(position);
+    }
+    void subIndexOfFetch(){ //use for: turn the main control power to the new not complete picked request.
+        indexOfFetch--;
+    }
+    void setRequestAt(int position,SingleRequest request){
+        requestSets.set(position,request);
     }
 }

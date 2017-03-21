@@ -14,10 +14,27 @@ public class Main {
             RequestQueue requestQueue = new RequestQueue();
 
             String request = input.readLine().replaceAll(" ","");//get a String and delete all space
+            int beforeRequestTime = 0; boolean isFirst = true;
             while(!(request.equals("run")||request.equals("RUN"))){  //loop to recognize
-                requestQueue.addRequest(request);
+                SingleRequest myRequest = new SingleRequest(request,beforeRequestTime);
+                if(myRequest.isLegalRequest()) {
+                    if(isFirst){
+                        if(myRequest.toString().equals("[FR,1,UP,0]"))
+                            isFirst = false;
+                        else{
+                            illegalMessage.add("INVALID ["+request+"]");
+                            request = input.readLine().replaceAll(" ","");
+                            continue;
+                        }
+                    }
+                    requestQueue.addRequest(myRequest);
+                    beforeRequestTime = myRequest.getRequestTime();
+                }
                 request = input.readLine().replaceAll(" ","");
             }
+            //If find all the request is illegal,we will exit.
+            if(requestQueue.getSizeOfQueue()==0)
+                outIllegalMessage();
             //we have recorder all the request but don't know whether it is legal request
             //the next we will send all the task to Dispatcher.
             ALSDispatcher alsDispatcher = new ALSDispatcher(requestQueue);
@@ -28,7 +45,7 @@ public class Main {
             System.out.println("Error!");
         }
     }
-    static void outIllegalMessage(){
+    private static void outIllegalMessage(){
         for (String anIllegalMessage : illegalMessage) System.out.println(anIllegalMessage);
         System.exit(0);//normal exit
     }

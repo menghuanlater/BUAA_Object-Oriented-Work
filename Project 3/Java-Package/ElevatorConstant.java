@@ -19,4 +19,5 @@ interface ElevatorConstant {
     int STATUS_STILL = 0;
     int INNER_REQUEST = 1;
     int OUTER_REQUEST = 2;
+    long MAX_REQUEST_TIME = (long)(Integer.MAX_VALUE)*2+1;
 }

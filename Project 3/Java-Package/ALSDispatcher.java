@@ -1,11 +1,36 @@
 package core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created on 2017-03-19.
  * we use extend to reuse Dispatcher class
- */
-class ALSDispatcher extends Dispatcher {
-
+ * we build a local class to record the pick able requests -->we only need one instance
+ * 顺路捎带情求:
+ * 1.(电梯当前的运动状态是UP：当前楼层<目标楼层)||(电梯当前的运动状态是DOWN：当前楼层>目标楼层)
+ * 2.对于任意的FR请求,如果是当前运动状态下的顺路请求,则：
+ *     (外部请求楼层方向=当前运动状态方向) && ((①)||(②))
+ *     ①：外部请求楼层方向是UP：(外部请求楼层<=目标楼层) && (外部请求楼层>当前楼层)
+ *     ②：外部请求楼层方向时DOWN：(外部请求楼层>=目标楼层) && (外部请求楼层<当前楼层)
+ * 3.对于任意的ER请求,如果是当前运动状态下的顺路请求,则：
+ *     (当前状是UP:请求楼层>当前楼层)||(当前状态是DOWN：请求楼层<当前楼层)
+ * */
+class Pick{
+    private int indexOfFetch;
+    private SingleRequest pickAbleRequest;
+    Pick(int indexOfFetch,SingleRequest pickAbleRequest){
+        this.indexOfFetch = indexOfFetch;
+        this.pickAbleRequest = pickAbleRequest;
+    }
+    int getIndexOfFetch(){
+        return indexOfFetch;
+    }
+    SingleRequest getPickAbleRequest(){
+        return pickAbleRequest;
+    }
+}
+class ALSDispatcher extends Dispatcher implements ElevatorConstant {
     ALSDispatcher(RequestQueue requestQueue){ //with parameter
         super(requestQueue);
     }
@@ -13,39 +38,129 @@ class ALSDispatcher extends Dispatcher {
     *  achieve the elevator main task.
     * */
     void carryOutTheElevator(){
-        int beforeRequestTime = 0;
-        boolean isFirst = true;
         while(requestQueue.haveNext()){
-            checkSameRequest(beforeRequestTime);
+            //check later,reset beforeRequestTime
+            checkSameRequest(requestQueue.getIndexOfFetch(),myElevator.getCompleteTime(),myElevator.getCompleteRequest());
+            while(pickDirectRequest());/* Find all can piggyback request,and it is a loop*loop... */
+            boolean isPickedPower = findPickedPower();//exist not complete picked request.Just for ER
+            if(isPickedPower)
+                requestQueue.subIndexOfFetch();
             SingleRequest request;
             if(requestQueue.haveNext())
-                request = new SingleRequest(requestQueue.getRequestNext(),beforeRequestTime);
+                request = requestQueue.getRequestNext();
             else{
                 myElevator.outPut();
                 return;
             }
-            if(!request.isLegalRequest()) //find the request is illegal
-                continue;
-            //deal the first not start at 0
-            if(isFirst){
-                if(!(request.getRequestTime()==0 && request.getTargetFloor()==1 && request.getRequestType()==OUTER_REQUEST
-                        && request.getMoveType()==STATUS_UP)){
-                    Main.illegalMessage.add("The first Legal request is not (FR,1,UP,0),the program will exit.");
-                    Main.outIllegalMessage();
-                }else
-                    isFirst = false;
-            }
-            pickOtherRequests();//Find all can piggyback request
             myElevator.outPut();
             myElevator.setCompleteRequest(request);
             myElevator.setCompleteTime();
             myElevator.setMoveDire();
-            beforeRequestTime = request.getRequestTime();
         }
         myElevator.outPut();
     }
-    //resolve problem of pick request
-    private void pickOtherRequests(){
-
+    //resolve problem of pick request(those we can resolve before the main request)
+    //checkPick() is use as common section of pickDirectRequest.
+    private boolean pickDirectRequest(){
+        int loopStart = requestQueue.getIndexOfFetch();
+        //SingleRequest objRequest = myElevator.getCompleteRequest();
+        if(myElevator.getMoveDire()==STATUS_STILL)
+            return false;
+        List<Pick> tempStack = new ArrayList<>();
+        int bestPickFloor = (myElevator.getMoveDire() == STATUS_UP)? (MAX_FLOOR+1) : (MIN_FLOOR-1);
+        for(;loopStart<requestQueue.getSizeOfQueue();loopStart++){
+            SingleRequest targetRequest = requestQueue.getRequestAt(loopStart);
+            if(targetRequest.getRequestTime()>=myElevator.getCompleteTime())
+                break;
+            if(targetRequest.getRequestType()==OUTER_REQUEST){ //FR
+                if(myElevator.getMoveDire() == STATUS_UP && targetRequest.getMoveType() == STATUS_UP){
+                    if(myElevator.isAblePick(targetRequest.getRequestTime(), targetRequest.getTargetFloor(),true)
+                            && myElevator.getCompleteRequest().getTargetFloor() >= targetRequest.getTargetFloor()){
+                        if(targetRequest.getTargetFloor()<bestPickFloor){
+                            bestPickFloor = targetRequest.getTargetFloor();
+                            tempStack.clear();
+                            tempStack.add(new Pick(loopStart,targetRequest));
+                        }else if(targetRequest.getTargetFloor()==bestPickFloor)
+                            addOrAbandon(tempStack,targetRequest,loopStart);
+                    }
+                }else if(myElevator.getMoveDire() == STATUS_DOWN && targetRequest.getMoveType() == STATUS_DOWN){
+                    if(myElevator.isAblePick(targetRequest.getRequestTime(), targetRequest.getTargetFloor(),false)
+                            && myElevator.getCompleteRequest().getTargetFloor() <= targetRequest.getTargetFloor()){
+                        if(targetRequest.getTargetFloor()>bestPickFloor){
+                            bestPickFloor = targetRequest.getTargetFloor();
+                            tempStack.clear();
+                            tempStack.add(new Pick(loopStart,targetRequest));
+                        }else if(targetRequest.getTargetFloor()==bestPickFloor)
+                            addOrAbandon(tempStack,targetRequest,loopStart);
+                    }
+                }
+            }else if(targetRequest.getRequestType()==INNER_REQUEST) {//ER
+                if(myElevator.getMoveDire() == STATUS_UP){
+                    if(myElevator.isAblePick(targetRequest.getRequestTime(), targetRequest.getTargetFloor(),true)
+                            && myElevator.getCompleteRequest().getTargetFloor() >= targetRequest.getTargetFloor()){
+                        if(targetRequest.getTargetFloor()<bestPickFloor){
+                            bestPickFloor = targetRequest.getTargetFloor();
+                            tempStack.clear();
+                            tempStack.add(new Pick(loopStart,targetRequest));
+                        }else if(targetRequest.getTargetFloor()==bestPickFloor)
+                            addOrAbandon(tempStack,targetRequest,loopStart);
+                    }
+                }else if(myElevator.getMoveDire() == STATUS_DOWN){
+                    if(myElevator.isAblePick(targetRequest.getRequestTime(), targetRequest.getTargetFloor(),false)
+                            && myElevator.getCompleteRequest().getTargetFloor() <= targetRequest.getTargetFloor()){
+                        if(targetRequest.getTargetFloor()>bestPickFloor){
+                            bestPickFloor = targetRequest.getTargetFloor();
+                            tempStack.clear();
+                            tempStack.add(new Pick(loopStart,targetRequest));
+                        }else if(targetRequest.getTargetFloor()==bestPickFloor)
+                            addOrAbandon(tempStack,targetRequest,loopStart);
+                    }
+                }
+            }
+        }
+        if(tempStack.size()==0)
+            return false;
+        else{
+            for(int i=tempStack.size() - 1;i >= 0;i--){
+                SingleRequest objRequest = tempStack.get(i).getPickAbleRequest();
+                checkSameRequest(tempStack.get(i).getIndexOfFetch()+1,myElevator.getArriveTime(objRequest.getTargetFloor()),
+                        objRequest);
+                myElevator.accomplishPickedRequest(objRequest);
+                requestQueue.delRequestAt(tempStack.get(i).getIndexOfFetch());
+            }
+            if(tempStack.get(0).getPickAbleRequest().getTargetFloor()!=myElevator.getCompleteRequest().getTargetFloor())
+                myElevator.resetMemberVars(tempStack.get(0).getPickAbleRequest().getTargetFloor());
+            return true;
+        }
+    }
+    private void addOrAbandon(List<Pick> tempStack,SingleRequest targetRequest,int indexOfFetch){
+        boolean addFlag = true;
+        for (Pick aTempStack : tempStack) {
+            SingleRequest objRequest = aTempStack.getPickAbleRequest();
+            if (objRequest.getRequestType()==targetRequest.getRequestType()) {
+                addFlag = false;
+                break;
+            }
+        }
+        if(addFlag)
+            tempStack.add(new Pick(indexOfFetch,targetRequest));
+    }
+    private boolean findPickedPower(){
+        SingleRequest objRequest = myElevator.getCompleteRequest();
+        int elevatorStatus = myElevator.getMoveDire();
+        if(objRequest==null || elevatorStatus==STATUS_STILL) //exit judge
+            return false;
+        for(int loopStart = requestQueue.getIndexOfFetch();loopStart<requestQueue.getSizeOfQueue();loopStart++) {
+            SingleRequest targetRequest = requestQueue.getRequestAt(loopStart);
+            if(targetRequest.getRequestType()==INNER_REQUEST && (elevatorStatus==STATUS_UP &&
+                    targetRequest.getTargetFloor()>objRequest.getTargetFloor() || elevatorStatus==STATUS_DOWN &&
+                targetRequest.getTargetFloor()<objRequest.getTargetFloor())){
+                int index = requestQueue.getIndexOfFetch();
+                requestQueue.setRequestAt(index-1,targetRequest);
+                requestQueue.delRequestAt(loopStart);
+                return true;
+            }
+        }
+        return false;
     }
 }
