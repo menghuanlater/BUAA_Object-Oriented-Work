@@ -33,7 +33,9 @@ class ALSDispatcher extends Dispatcher implements ElevatorConstant {
         while(requestQueue.haveNext()){
             //check later,reset beforeRequestTime
             checkSameRequest(requestQueue.getIndexOfFetch(),myElevator.getCompleteTime(),myElevator.getCompleteRequest());
-            while(pickDirectRequest());/* Find all can piggyback request,and it is a loop*loop... */
+            //if the while continue,we continue the main scan continue.
+            while(pickDirectRequest())/* Find all can piggyback request,and it is a loop*loop... */
+                checkSameRequest(requestQueue.getIndexOfFetch(),myElevator.getCompleteTime(),myElevator.getCompleteRequest());
             boolean isPickedPower = findPickedPower();//exist not complete picked request.Just for ER
             if(isPickedPower)
                 requestQueue.subIndexOfFetch();
@@ -62,7 +64,7 @@ class ALSDispatcher extends Dispatcher implements ElevatorConstant {
         int bestPickFloor = (myElevator.getMoveDire() == STATUS_UP)? (MAX_FLOOR+1) : (MIN_FLOOR-1);
         for(;loopStart<requestQueue.getSizeOfQueue();loopStart++){
             SingleRequest targetRequest = requestQueue.getRequestAt(loopStart);
-            if(targetRequest.getRequestTime()>=myElevator.getCompleteTime())
+            if(targetRequest.getRequestTime()>=myElevator.getCompleteTime()-openCloseInterval)
                 break;
             if(targetRequest.getRequestType()==OUTER_REQUEST){ //FR
                 if(myElevator.getMoveDire() == STATUS_UP && targetRequest.getMoveType() == STATUS_UP){
@@ -115,13 +117,13 @@ class ALSDispatcher extends Dispatcher implements ElevatorConstant {
         else{
             for(int i=tempStack.size() - 1;i >= 0;i--){
                 SingleRequest objRequest = tempStack.get(i).getPickAbleRequest();
-                checkSameRequest(tempStack.get(i).getIndexOfFetch()+1,myElevator.getArriveTime(objRequest.getTargetFloor()),
+                checkSameRequest(tempStack.get(i).getIndexOfFetch()+1,myElevator.getArriveTime(objRequest.getTargetFloor())+openCloseInterval,
                         objRequest);
+                requestQueue.delRequestAt(tempStack.get(i).getIndexOfFetch());
             }
-            for(int i=0;i<tempStack.size();i++){
-                SingleRequest objRequest = tempStack.get(i).getPickAbleRequest();
+            for (Pick aTempStack : tempStack) {
+                SingleRequest objRequest = aTempStack.getPickAbleRequest();
                 myElevator.accomplishPickedRequest(objRequest);
-                requestQueue.delRequestAt(tempStack.get(i).getIndexOfFetch()-i);
             }
             if(tempStack.get(0).getPickAbleRequest().getTargetFloor()!=myElevator.getCompleteRequest().getTargetFloor())
                 myElevator.resetMemberVars(tempStack.get(0).getPickAbleRequest().getTargetFloor());
@@ -147,6 +149,8 @@ class ALSDispatcher extends Dispatcher implements ElevatorConstant {
             return false;
         for(int loopStart = requestQueue.getIndexOfFetch();loopStart<requestQueue.getSizeOfQueue();loopStart++) {
             SingleRequest targetRequest = requestQueue.getRequestAt(loopStart);
+            if(targetRequest.getRequestTime()>myElevator.getCompleteTime()-openCloseInterval)
+                break;
             if(targetRequest.getRequestType()==INNER_REQUEST && (elevatorStatus==STATUS_UP &&
                     targetRequest.getTargetFloor()>objRequest.getTargetFloor() || elevatorStatus==STATUS_DOWN &&
                 targetRequest.getTargetFloor()<objRequest.getTargetFloor())){
