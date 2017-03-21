@@ -121,7 +121,7 @@ class ALSDispatcher extends Dispatcher implements ElevatorConstant {
             for(int i=0;i<tempStack.size();i++){
                 SingleRequest objRequest = tempStack.get(i).getPickAbleRequest();
                 myElevator.accomplishPickedRequest(objRequest);
-                requestQueue.delRequestAt(tempStack.get(i).getIndexOfFetch());
+                requestQueue.delRequestAt(tempStack.get(i).getIndexOfFetch()-i);
             }
             if(tempStack.get(0).getPickAbleRequest().getTargetFloor()!=myElevator.getCompleteRequest().getTargetFloor())
                 myElevator.resetMemberVars(tempStack.get(0).getPickAbleRequest().getTargetFloor());
