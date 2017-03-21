@@ -7,14 +7,6 @@ import java.util.List;
  * Created on 2017-03-19.
  * we use extend to reuse Dispatcher class
  * we build a local class to record the pick able requests -->we only need one instance
- * 顺路捎带情求:
- * 1.(电梯当前的运动状态是UP：当前楼层<目标楼层)||(电梯当前的运动状态是DOWN：当前楼层>目标楼层)
- * 2.对于任意的FR请求,如果是当前运动状态下的顺路请求,则：
- *     (外部请求楼层方向=当前运动状态方向) && ((①)||(②))
- *     ①：外部请求楼层方向是UP：(外部请求楼层<=目标楼层) && (外部请求楼层>当前楼层)
- *     ②：外部请求楼层方向时DOWN：(外部请求楼层>=目标楼层) && (外部请求楼层<当前楼层)
- * 3.对于任意的ER请求,如果是当前运动状态下的顺路请求,则：
- *     (当前状是UP:请求楼层>当前楼层)||(当前状态是DOWN：请求楼层<当前楼层)
  * */
 class Pick{
     private int indexOfFetch;
@@ -125,6 +117,9 @@ class ALSDispatcher extends Dispatcher implements ElevatorConstant {
                 SingleRequest objRequest = tempStack.get(i).getPickAbleRequest();
                 checkSameRequest(tempStack.get(i).getIndexOfFetch()+1,myElevator.getArriveTime(objRequest.getTargetFloor()),
                         objRequest);
+            }
+            for(int i=0;i<tempStack.size();i++){
+                SingleRequest objRequest = tempStack.get(i).getPickAbleRequest();
                 myElevator.accomplishPickedRequest(objRequest);
                 requestQueue.delRequestAt(tempStack.get(i).getIndexOfFetch());
             }
