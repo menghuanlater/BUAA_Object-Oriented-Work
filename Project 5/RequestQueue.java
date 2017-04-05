@@ -13,13 +13,13 @@ class RequestQueue {
         requestSets = new ArrayList<>();
         indexOfFetch = 0;
     }
-    void addRequest(SingleRequest request){
+    synchronized void addRequest(SingleRequest request){
         this.requestSets.add(request);
     }
-    SingleRequest getFrontRequest(){
+    synchronized SingleRequest getFrontRequest(){
         return (requestSets.size()>0)? requestSets.get(0):null;
     }
-    void delRequestAt(int position){
+    synchronized void delRequestAt(int position){
         requestSets.remove(position);
     }
     int getSizeOfQueue(){

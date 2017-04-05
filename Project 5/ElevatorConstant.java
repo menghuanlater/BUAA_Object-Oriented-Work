@@ -23,5 +23,5 @@ interface ElevatorConstant {
     int OUTER_REQUEST = 2;
     int ELE_NUM = 3;
     int LINE_REQUEST_MAX = 10;
-    int TIME_RESUME = 20; //set the time resume as 30ms,make up for program resume.
+    //int TIME_RESUME = 0; //set the time resume as 30ms,make up for program resume.
 }

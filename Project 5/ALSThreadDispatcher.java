@@ -45,48 +45,44 @@ public class ALSThreadDispatcher extends ALSDispatcher implements Runnable,Eleva
                 //if not pick,will add to the end of the queue.
             }
             //next scan the new queue. but maybe is empty.
-            synchronized (requestQueue) {
-                SingleRequest objRequest;
-                while ((objRequest = requestQueue.getFrontRequest()) != null) {
-                    if (isSameRequest(objRequest)) {
-                        try {
-                            Main.bufferedWriter.write(Main.getStandardOSTime() + ":SAME [" + objRequest.getRequestStr() + " ," +
-                                     decimalFormat.format(objRequest.getRequestTime())+ "]\n");
-                            Main.bufferedWriter.flush();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        if (objRequest.getRequestType() == INNER_REQUEST) {//ER
-                            int ele = objRequest.getTargetEle();
-                            elevators[ele - 1].lightButtonAt(objRequest.getTargetFloor()-1,objRequest.getRequestTime());
-                            if(elevators[ele-1].getMoveDire()==STATUS_STILL)
-                                elevators[ele-1].dispatcherSetMoveDire(objRequest.getTargetFloor());
-                            if(elevators[ele-1].getMoveDire()==STATUS_OPEN_CLOSE && elevators[ele-1].getStillToMove()==STATUS_STILL){
-                                elevators[ele-1].setStillToMove(objRequest.getTargetFloor());
-                            }
-                        } else if (objRequest.getRequestType() == OUTER_REQUEST) {//FR
-                            //need to choose which elevator exec this request.
-                            int targetFloor = objRequest.getTargetFloor();
-                            synchronized (floors) {
-                                int ele = chooseElevatorExec(objRequest, true);
-                                if (objRequest.getMoveType() == STATUS_UP) {
-                                    floors.setFloorUpLightStatusAt(targetFloor - 1, true);
-                                    floors.setLightUpTimeAt(targetFloor - 1, objRequest.getRequestTime());
-                                    floors.setExecUpElevatorAt(targetFloor - 1, ele);
-                                } else if (objRequest.getMoveType() == STATUS_DOWN) {
-                                    floors.setFloorDownLightStatusAt(targetFloor - 1, true);
-                                    floors.setLightDownTimeAt(targetFloor - 1, objRequest.getRequestTime());
-                                    floors.setExecDownElevatorAt(targetFloor - 1, ele);
-                                }
-                                if (ele == 0) bufferRequest.add(objRequest);
-                                else if (elevators[ele - 1].getMoveDire() == STATUS_STILL)
-                                    elevators[ele - 1].dispatcherSetMoveDire(objRequest.getTargetFloor());
-                            }
-                        }
+            SingleRequest objRequest;
+            while ((objRequest = requestQueue.getFrontRequest()) != null) {
+                if (isSameRequest(objRequest)) {
+                    try {
+                        Main.bufferedWriter.write(Main.getStandardOSTime() + ":SAME [" + objRequest.getRequestStr() + " ," +
+                                decimalFormat.format(Math.floor(objRequest.getRequestTime())) + "]\n");
+                        Main.bufferedWriter.flush();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                    requestQueue.delRequestAt(0);
+                } else {
+                    if (objRequest.getRequestType() == INNER_REQUEST) {//ER
+                        int ele = objRequest.getTargetEle();
+                        elevators[ele - 1].lightButtonAt(objRequest.getTargetFloor() - 1, objRequest.getRequestTime());
+                        if (elevators[ele - 1].getMoveDire() == STATUS_STILL)
+                            elevators[ele - 1].dispatcherSetMoveDire(objRequest.getTargetFloor());
+                        if (elevators[ele - 1].getMoveDire() == STATUS_OPEN_CLOSE && elevators[ele - 1].getStillToMove() == STATUS_STILL) {
+                            elevators[ele - 1].setStillToMove(objRequest.getTargetFloor());
+                        }
+                    } else if (objRequest.getRequestType() == OUTER_REQUEST) {//FR
+                        //need to choose which elevator exec this request.
+                        int targetFloor = objRequest.getTargetFloor();
+                        int ele = chooseElevatorExec(objRequest, true);
+                        if (objRequest.getMoveType() == STATUS_UP) {
+                            floors.setFloorUpLightStatusAt(targetFloor - 1, true);
+                            floors.setLightUpTimeAt(targetFloor - 1, objRequest.getRequestTime());
+                            floors.setExecUpElevatorAt(targetFloor - 1, ele);
+                        } else if (objRequest.getMoveType() == STATUS_DOWN) {
+                            floors.setFloorDownLightStatusAt(targetFloor - 1, true);
+                            floors.setLightDownTimeAt(targetFloor - 1, objRequest.getRequestTime());
+                            floors.setExecDownElevatorAt(targetFloor - 1, ele);
+                        }
+                        if (ele == 0) bufferRequest.add(objRequest);
+                        else if (elevators[ele - 1].getMoveDire() == STATUS_STILL)
+                            elevators[ele - 1].dispatcherSetMoveDire(objRequest.getTargetFloor());
+                    }
                 }
+                requestQueue.delRequestAt(0);
             }
         }
     }
@@ -166,17 +162,5 @@ public class ALSThreadDispatcher extends ALSDispatcher implements Runnable,Eleva
             } else
                 return 0;
         }
-    }
-    private void waitAllElevators(){
-        try{
-            for(int i=0;i<ELE_NUM;i++)
-                elevators[i].wait();
-        }catch (InterruptedException e){
-            e.printStackTrace();
-        }
-    }
-    private void notifyAllElevators(){
-        for(int i=0;i<ELE_NUM;i++)
-            elevators[i].notify();
     }
 }

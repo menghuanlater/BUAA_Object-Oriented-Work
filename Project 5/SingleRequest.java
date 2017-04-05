@@ -14,7 +14,7 @@ class SingleRequest implements ElevatorConstant{
     private int targetEle;//target elevator just for ER
     private String requestStr;//request String
     private boolean legalRequest = true;
-    DecimalFormat decimalFormat = new DecimalFormat("0.0");//standard
+    private DecimalFormat decimalFormat = new DecimalFormat("0.0");//standard
     SingleRequest(String request,double requestTime){ //include check legacy
         this.requestStr = request;
         this.requestTime = requestTime;
@@ -26,10 +26,9 @@ class SingleRequest implements ElevatorConstant{
             String args[] = request.substring(1,request.length()-1).split(",");
             if(args.length==ARGS){
                 if(args[0].equals(ELEVATOR_INNER)) {//ER
-                    args[1] = args[1].replace("#","");
                     try{
                         requestType = INNER_REQUEST;
-                        targetEle = Integer.parseInt(args[1]);
+                        targetEle = Integer.parseInt(args[1].substring(1));
                         targetFloor = Integer.parseInt(args[2]);
                         if(targetEle<=0 || targetEle>ELE_NUM || !(checkFloorLegacy(targetFloor)))
                             errorBuild(request);
@@ -53,7 +52,8 @@ class SingleRequest implements ElevatorConstant{
                     }catch(Exception e){
                         errorBuild(request);
                     }
-                }
+                }else
+                    errorBuild(request);
             }else{
                 errorBuild(request);
             }
@@ -63,7 +63,7 @@ class SingleRequest implements ElevatorConstant{
     private void errorBuild(String request){
         try {
             Main.bufferedWriter.write(Main.getStandardOSTime()+":INVALID ["+request+", "+
-                    decimalFormat.format(requestTime)+"]\n");
+                    decimalFormat.format(Math.floor(requestTime))+"]\n");
             Main.bufferedWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();

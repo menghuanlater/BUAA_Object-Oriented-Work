@@ -38,23 +38,17 @@ class InputHandle extends Thread implements ElevatorConstant{
             }
             if(requestSets.length==0)
                 continue;
-            if(requestSets.length>LINE_REQUEST_MAX){
-                Main.bufferedWriter.write(Main.getStandardOSTime()+":Warning:Found you have input more than "+
-                        LINE_REQUEST_MAX+" request,we will regard over section as invalid request.\n");
-                Main.bufferedWriter.flush();
-                for(int i=LINE_REQUEST_MAX;i<requestSets.length;i++) {
-                    Main.bufferedWriter.write(Main.getStandardOSTime() + ":INVALID [" + requestSets[i] + ", " +
-                            decimalFormat.format(requestTime) + "]\n");
+            int count = 0;
+            for (String requestSet : requestSets) {
+                if(count>LINE_REQUEST_MAX){
+                    Main.bufferedWriter.write(Main.getStandardOSTime() + ":INVALID [" + requestSet + ", " +
+                            decimalFormat.format(Math.floor(requestTime)) + "]\n");
                     Main.bufferedWriter.flush();
                 }
-            }
-            int loopLength = (requestSets.length>LINE_REQUEST_MAX)? LINE_REQUEST_MAX:requestSets.length;
-            synchronized (requestQueue) {
-                for (int loop = 0; loop < loopLength; loop++) {
-                    SingleRequest request = new SingleRequest(requestSets[loop],requestTime);
-                    if (request.isLegalRequest()) {
-                        requestQueue.addRequest(request);
-                    }
+                SingleRequest request = new SingleRequest(requestSet, requestTime);
+                if (request.isLegalRequest()) {
+                    requestQueue.addRequest(request);
+                    count++;
                 }
             }
         }
