@@ -30,7 +30,7 @@ class SingleRequest implements ElevatorConstant{
                         requestType = INNER_REQUEST;
                         targetEle = Integer.parseInt(args[1].substring(1));
                         targetFloor = Integer.parseInt(args[2]);
-                        if(targetEle<=0 || targetEle>ELE_NUM || !(checkFloorLegacy(targetFloor)))
+                        if(args[1].charAt(0)!='#' || targetEle<=0 || targetEle>ELE_NUM || !(checkFloorLegacy(targetFloor)))
                             errorBuild(request);
                     }catch(Exception e){
                         errorBuild(request);
