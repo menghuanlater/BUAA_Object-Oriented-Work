@@ -40,10 +40,11 @@ class InputHandle extends Thread implements ElevatorConstant{
                 continue;
             int count = 0;
             for (String requestSet : requestSets) {
-                if(count>LINE_REQUEST_MAX){
+                if(count>=LINE_REQUEST_MAX){
                     Main.bufferedWriter.write(Main.getStandardOSTime() + ":INVALID [" + requestSet + ", " +
                             decimalFormat.format(Math.floor(requestTime)) + "]\n");
                     Main.bufferedWriter.flush();
+                    break;
                 }
                 SingleRequest request = new SingleRequest(requestSet, requestTime);
                 if (request.isLegalRequest()) {
