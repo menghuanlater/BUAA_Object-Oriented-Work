@@ -22,6 +22,8 @@ public class ALSThreadDispatcher extends ALSDispatcher implements Runnable,Eleva
     public void run(){
         startElevators();
         while(true) {
+            sleep(1);//just sleep 1ms to reduce some error occur posibility.
+            //通过沉睡1ms的方式可以极大程度上降低出错的概率(线程延迟问题),but it may be not a smart method.
             //first we scan the buffer queue, see whether exist elev can react to.
             //and we will re use chooseElevatorExec
             if(Main.inputHandle.getState()== Thread.State.TERMINATED && bufferRequest.size()==0 && isAllStill()){
