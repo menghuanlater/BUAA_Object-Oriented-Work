@@ -49,7 +49,7 @@ class CommandTaxi extends Thread implements GlobalConstant{
         //将交付信息输入到HashMap
         String info = Main.getCurrentTime()+"s 请求被"+taxiCode+"号车在(" +
                 +monitorTaxi.getCurrentRow()+","+monitorTaxi.getCurrentCol()+")接手.";
-        Main.safeFile.writetoFile(get.toHashString(),info);
+        Main.safeFilePassenger.writeToFile(get.toHashString(),info);
         Main.outPutInfoToTerminal(info);
         monitorTaxi.setCurrentStatus(GRAB_SERVICE);
         monitorTaxi.clearHashMap();//清空哈希表
@@ -113,7 +113,7 @@ class CommandTaxi extends Thread implements GlobalConstant{
         }
         //输出实际行驶路径到文件和控制台.
         Main.outPutInfoToTerminal(info);
-        Main.safeFile.writetoFile(allocRequest.toHashString(),info);
+        Main.safeFilePassenger.writeToFile(allocRequest.toHashString(),info);
     }
     //服务状态
     private void carryInService() throws InterruptedException{
@@ -129,7 +129,7 @@ class CommandTaxi extends Thread implements GlobalConstant{
         monitorTaxi.setCurrentStatus(WAIT_SERVICE);//重新设置为等待服务状态
         //输出实际行驶路径到文件和控制台
         Main.outPutInfoToTerminal(info);
-        Main.safeFile.writetoFile(allocRequest.toHashString(),info);
+        Main.safeFilePassenger.writeToFile(allocRequest.toHashString(),info);
     }
     //为了避免代码冗余设计,新增的
     private String driveByShortestPath(List<Integer> shortestPath) throws InterruptedException{

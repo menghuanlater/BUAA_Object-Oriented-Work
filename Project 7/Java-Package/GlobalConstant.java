@@ -44,4 +44,5 @@ interface GlobalConstant {
     String MAP_NAME = "map.txt";//定义地图文件名
     String SEARCH_OUT = "search.txt";//输出搜索信息
     String PASSENGER_OUT = "passenger.txt";//输出接客信息
+    String REQUEST_SCAN = "requestScan.txt";//输出请求开始时,周边所有的出租车状态信息
 }

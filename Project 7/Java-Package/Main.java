@@ -22,7 +22,8 @@ public class Main implements GlobalConstant{
     static Taxi[] taxiSets = new Taxi[SUM_CARS];//100个出租车
     static CommandTaxi[] commandTaxis = new CommandTaxi[SUM_CARS];//100个出租车调度线程(执行与信息存储分离)
     static MapRequestSignal mapSignal = new MapRequestSignal();//地图请求信号
-    static SafeFile safeFile = new SafeFile();//出租车相关信息输出到文件的安全类,请求完成时输出.
+    static SafeFile safeFilePassenger = new SafeFile(PASSENGER_OUT);//出租车服务处理相关信息输出到文件的安全类,程序最后输出.
+    static SafeFile safeFileRequest = new SafeFile(REQUEST_SCAN);//请求发出时周边所有的出租车状态信息.
     //用于迪杰斯特拉算法所需的变量(避免每次都重新分配)
     private static boolean find[] = new boolean[NODE_NUM];
     private static int pathArc[] = new int[NODE_NUM];
@@ -85,7 +86,8 @@ public class Main implements GlobalConstant{
         //over all thread
         Thread.sleep(10);//再休眠10ms,终止所有的出租车线程.
         //将所有的服务信息统一从缓冲区刷新到文件
-        safeFile.outPutToFile();//刷新全部缓冲,输出到文件
+        safeFilePassenger.outPutToFile();//刷新全部缓冲,输出到文件
+        safeFileRequest.outPutToFile();//刷新全部缓冲,输出到文件
         for(int i=0;i<SUM_CARS;i++)
             commandTaxis[i].stop();
         System.out.println("All thread have exist successfully!");

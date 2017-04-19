@@ -23,6 +23,7 @@ class RequestInputHandler extends Thread implements GlobalConstant {
         String line;
         try {
             while(!(line = input.readLine().replaceAll(" ","")).equalsIgnoreCase("end")){
+                if(line.length()==0) continue;
                 double requestTime = Double.valueOf(Main.decimalFormat.format((System.currentTimeMillis()-Main.startTime)/1000.0));
                 List<SearchRequest> sList = new ArrayList<>();
                 List<PassengerRequest> pList = new ArrayList<>();

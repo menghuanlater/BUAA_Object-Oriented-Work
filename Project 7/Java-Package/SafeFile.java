@@ -14,22 +14,22 @@ import java.util.Map;
  * 一次只能由一个出租车输出信息到文件
  */
 class SafeFile implements GlobalConstant{
-    private Path outFile = Paths.get(PASSENGER_OUT);
     private BufferedWriter bw;
     private HashMap<String,String> allInfoSets = new HashMap<>(100);
-    SafeFile(){
+    SafeFile(String filename){
         try {
+            Path outFile = Paths.get(filename);
             bw = Files.newBufferedWriter(outFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    synchronized void writetoFile(String hashString,String info){
+    synchronized void writeToFile(String hashString,String info){
         String temp = allInfoSets.get(hashString);
         if(temp!=null)
             allInfoSets.put(hashString,temp+info+"\n");
         else
-            allInfoSets.put(hashString,info);
+            allInfoSets.put(hashString,info+"\n");
     }
     void outPutToFile(){
         Iterator iter = allInfoSets.entrySet().iterator();
@@ -38,6 +38,7 @@ class SafeFile implements GlobalConstant{
             try {
                 bw.write("请求********"+entry.getKey()+"***************\n");
                 bw.write((String) entry.getValue());
+                bw.flush();
             } catch (IOException e) {
                 e.printStackTrace();
             }

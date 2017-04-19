@@ -2,11 +2,13 @@ package core;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
  * Created on 2017-04-16.
- * 该类的目的在于将地图所有点设置为ArrayList,一旦请求信号辐射,insert
+ * 该类的目的在于将地图所有点设置为ArrayList,一旦请求信号辐射,insert,并且
+ * 扫描所有出租车,将所有在请求开始辐射区域内的所有出租车找到,输出他们的信息.
  */
 class MapRequestSignal implements GlobalConstant{
     private List[] map = new List[NODE_NUM];
@@ -15,12 +17,35 @@ class MapRequestSignal implements GlobalConstant{
             map[i] = new ArrayList<PassengerRequest>();
     }
     synchronized void setMapSignal(List<PassengerRequest> prList){
+        //首先将所有出租车拷贝下来.
+        HashMap<Integer,List<PassengerRequest>> hashMap = new HashMap<>(50);
+        Taxi[] taxiSets = new Taxi[SUM_CARS];
+        for(int i=0;i<SUM_CARS;i++)
+            taxiSets[i] = Main.taxiSets[i].clone();
+        //执行正常的辐射,其中附带标注了哪些点有请求.--->HashMap实现
         for (PassengerRequest aPrList : prList) {
             Main.gui.RequestTaxi(new Point(aPrList.getSrcRow(),aPrList.getSrcCol()),new Point(
                     aPrList.getDstRow(),aPrList.getDstCol()));
             List<Integer> temp = aPrList.getCtrlArea();
             for (Integer aTemp : temp) {
                 map[aTemp].add(aPrList);
+                if(hashMap.get(aTemp)==null){
+                    List<PassengerRequest> list = new ArrayList<>();
+                    list.add(aPrList);
+                    hashMap.put(aTemp,list);
+                }else{
+                    hashMap.get(aTemp).add(aPrList);
+                }
+            }
+        }
+        //此信息不输出到终端
+        List<PassengerRequest> list;
+        for(int i=0;i<SUM_CARS;i++){
+            int position = taxiSets[i].getCurrentPosition();
+            if((list=hashMap.get(position))!=null){
+                for(PassengerRequest aList : list)
+                    Main.safeFileRequest.writeToFile(aList.toHashString(),"出租车编号:"+taxiSets[i].getTaxiCode()+
+                    "\t"+taxiSets[i].toString());
             }
         }
     }

@@ -71,7 +71,7 @@ class Taxi implements GlobalConstant,Cloneable{
                     //一旦抢单成功就需要输出信息到SafeFile
                     String info = Main.getCurrentTime() + "s 被" + taxiCode +
                             "号出租车抢单.位置:(" + currentRow + "," + currentCol + ")\t信用值:" + currentCredit;
-                    Main.safeFile.writetoFile(hashKey, info);
+                    Main.safeFilePassenger.writeToFile(hashKey, info);
                     Main.outPutInfoToTerminal(hashKey + "\t" + info);
                 }
             }
