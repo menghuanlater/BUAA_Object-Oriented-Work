@@ -24,28 +24,28 @@ class PassengerRequest implements GlobalConstant{
         this.requestTime = requestTime;
         this.grabTaxis = new ArrayList<>();
         this.ctrlArea = new ArrayList<>();
-        if(src.length()<=5 || dst.length()<=5)
+        if(src.length()<5 || dst.length()<5)
             this.legacy = false;
         else{
+            try {
             String srcArg[] = src.substring(1,src.length()-1).split(",");
             String dstArg[] = dst.substring(1,dst.length()-1).split(",");
             if(srcArg.length!=2 || dstArg.length!=2)
                 this.legacy = false;
             else{
-                try{
-                    srcRow = Integer.parseInt(srcArg[0]);
-                    srcCol = Integer.parseInt(srcArg[1]);
-                    dstRow = Integer.parseInt(dstArg[0]);
-                    dstCol = Integer.parseInt(dstArg[1]);
-                    if(!(srcRow==dstRow && srcCol==dstCol) &&checkRowCol(srcRow,srcCol) && checkRowCol(dstRow,dstCol)){
-                        startCode = Main.getCodeByRowCol(srcRow,srcCol);
-                        endCode = Main.getCodeByRowCol(dstRow,dstCol);
-                        findCtrlArea();
-                    }else
-                        this.legacy = false;
-                }catch (Exception e){
+                srcRow = Integer.parseInt(srcArg[0]);
+                srcCol = Integer.parseInt(srcArg[1]);
+                dstRow = Integer.parseInt(dstArg[0]);
+                dstCol = Integer.parseInt(dstArg[1]);
+                if(!(srcRow==dstRow && srcCol==dstCol) &&checkRowCol(srcRow,srcCol) && checkRowCol(dstRow,dstCol)){
+                    startCode = Main.getCodeByRowCol(srcRow,srcCol);
+                    endCode = Main.getCodeByRowCol(dstRow,dstCol);
+                    findCtrlArea();
+                }else
                     this.legacy = false;
                 }
+            }catch (Exception e){
+                this.legacy = false;
             }
         }
     }
@@ -62,9 +62,9 @@ class PassengerRequest implements GlobalConstant{
     String getRequest() {
         return request;
     }
-    double getRequestTime() {
+    /*double getRequestTime() {
         return requestTime;
-    }
+    }*/
     void addGrabTaxi(int taxiCode){
         grabTaxis.add(taxiCode);
     }
@@ -78,7 +78,7 @@ class PassengerRequest implements GlobalConstant{
         int y_s = getCtrlColStart();
         int y_e = getCtrlColEnd();
         for(int i=x_s;i<=x_e;i++)
-            for(int j=y_s;j<y_e;j++)
+            for(int j=y_s;j<=y_e;j++)
                 ctrlArea.add(Main.getCodeByRowCol(i,j));
     }
     private int getCtrlRowStart(){

@@ -38,6 +38,7 @@ class SafeFile implements GlobalConstant{
             try {
                 bw.write("请求********"+entry.getKey()+"***************\n");
                 bw.write((String) entry.getValue());
+                bw.write("\n");//分隔
                 bw.flush();
             } catch (IOException e) {
                 e.printStackTrace();
