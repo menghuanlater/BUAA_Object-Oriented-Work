@@ -38,6 +38,10 @@ interface GlobalConstant {
     //关于请求的常量值
     String PASSENGER = "CR";
     String SEARCH = "SR";
+    String WAITING = "waiting";
+    String SERVIING = "serving";
+    String GRABBING = "grabbing";
+    String STOPPING = "stopping";
     int ARGUMENT_P = 5;//包含多余分割
     int ARGUMENT_S = 2;
     //输入输出文件名
