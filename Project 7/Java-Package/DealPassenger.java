@@ -34,7 +34,7 @@ class AllocTaxi extends Thread implements GlobalConstant{
             for (Integer aTaxisCode : taxisCode){
                 Taxi temp = Main.taxiSets[aTaxisCode].clone();
                 if(temp.getCurrentStatus()==WAIT_SERVICE)
-                    taxis.add(temp);
+                    taxis.add(Main.taxiSets[aTaxisCode].clone());
             }
             if(taxis.size()==0){
                 Main.outPutInfoToTerminal(target.getRequest()+" 没有出租车响应.");

@@ -33,6 +33,9 @@ public class Main implements GlobalConstant{
         System.out.println("欢迎使用出租车调度管理系统,请输入请求.");
         MapInputHandler mapInputHandler = new MapInputHandler();
         mapInputHandler.readTheMapFile();
+        //List<Integer> s = getShortestPath(223,1599);
+        //System.out.println(s.size());
+        //System.exit(0);
         gui.LoadMap(matrixGui,ROW_NUMBER);
         //地图录入结束,下面进行线程启动
         //first,申明队列
@@ -151,7 +154,8 @@ public class Main implements GlobalConstant{
                     min = shortPathTable[w];
                 }
             }
-            if(k==endCode) break;
+            if(k==endCode)
+                break;
             find[k] = true;
             List<Integer> relateList = getConnectList(k);
             for (Integer aRelateList : relateList) {
