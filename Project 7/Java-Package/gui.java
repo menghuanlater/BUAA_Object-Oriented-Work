@@ -523,7 +523,7 @@ class TaxiGUI {// GUI接口类
 		gt.status = status;
 	}
 
-	public void RequestTaxi(Point src, Point dst) {
+	public synchronized void RequestTaxi(Point src, Point dst) {
 		// 将src周围标红
 		guigv.srclist.add(src);
 		// 计算最短路径的值,通过一个窗口弹出

@@ -3,7 +3,10 @@ package core;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created on 17-4-16.
@@ -28,6 +31,8 @@ public class Main implements GlobalConstant{
     private static boolean find[] = new boolean[NODE_NUM];
     private static int pathArc[] = new int[NODE_NUM];
     private static int shortPathTable[] = new int[NODE_NUM];
+    //专门为输出做的锁
+    private static Lock lock = new ReentrantLock();
 
     public static void main(String[] args) throws IOException, InterruptedException {
         System.out.println("欢迎使用出租车调度管理系统,请输入请求.");
@@ -88,9 +93,9 @@ public class Main implements GlobalConstant{
         }
         //over all thread
         Thread.sleep(10);//再休眠10ms,终止所有的出租车线程.
-        //将所有的服务信息统一从缓冲区刷新到文件
-        safeFilePassenger.outPutToFile();//刷新全部缓冲,输出到文件
-        safeFileRequest.outPutToFile();//刷新全部缓冲,输出到文件
+        //关闭输出流
+        safeFilePassenger.closeFileOutStream();
+        safeFileRequest.closeFileOutStream();
         for(int i=0;i<SUM_CARS;i++)
             commandTaxis[i].stop();
         System.out.println("All thread have exist successfully!");
@@ -114,25 +119,27 @@ public class Main implements GlobalConstant{
         System.exit(0);//地图非法,程序终止
     }
     //最短路径Dijkstra算法优化模式.getConnectList是辅助优化,避免找到一个结点的最短路径去循环遍历所有
+    //同时也辅助广度优先搜索,并且加入判断点是最短路径是否已经找到
     private static List<Integer> getConnectList(int targetCode){
         List<Integer> temp = new ArrayList<>();
         int targetRow = getRowByCode(targetCode);
         int targetCol = getColByCode(targetCode);
         //UP
-        if(targetRow>0 && matrix[targetCode-COL_NUMBER][targetCode])
+        if(targetRow>0 && matrix[targetCode-COL_NUMBER][targetCode] && !find[targetCode-COL_NUMBER])
             temp.add(targetCode-COL_NUMBER);
         //DOWN
-        if(targetRow<ROW_NUMBER-1 && matrix[targetCode+COL_NUMBER][targetCode])
+        if(targetRow<ROW_NUMBER-1 && matrix[targetCode+COL_NUMBER][targetCode] && !find[targetCode+COL_NUMBER])
             temp.add(targetCode+COL_NUMBER);
         //LEFT
-        if(targetCol>0 && matrix[targetCode-1][targetCode])
+        if(targetCol>0 && matrix[targetCode-1][targetCode] && !find[targetCode-1])
             temp.add(targetCode-1);
         //RIGHT
-        if(targetCol<COL_NUMBER-1 && matrix[targetCode+1][targetCode])
+        if(targetCol<COL_NUMBER-1 && matrix[targetCode+1][targetCode] && !find[targetCode+1])
             temp.add(targetCode+1);
         return temp;
     }
-    static List<Integer> getShortestPath(int startCode,int endCode){
+    //由于存在全局变量,同时多个线程请求计算会出问题
+    static synchronized List<Integer> getShortestPath(int startCode,int endCode){
         long algorithmStart = System.currentTimeMillis();//计算运行时间,用于后面出租车时间的修正补偿
         List<Integer> temp = new ArrayList<>();
         //首先针对全局辅助静态变量初始化.
@@ -159,7 +166,7 @@ public class Main implements GlobalConstant{
             find[k] = true;
             List<Integer> relateList = getConnectList(k);
             for (Integer aRelateList : relateList) {
-                if (!find[aRelateList] && (min + 1) < shortPathTable[aRelateList]) {
+                if ((min + 1) < shortPathTable[aRelateList]) {
                     shortPathTable[aRelateList] = min + 1;
                     pathArc[aRelateList] = k;
                 }
@@ -175,8 +182,28 @@ public class Main implements GlobalConstant{
         temp.add(startCode);
         return temp;
     }
+    //最短路径广度优先算法,算法的目的在于选择距离请求出发点最近的出租车,找到一个直接返回
+    static synchronized int getNearestTaxi(int srcPos, HashMap<Integer,Integer> availableTaxis){
+        for(int i=0;i<NODE_NUM;i++)
+            find[i] = false;
+        List<Integer> queue = new ArrayList<>();
+        queue.add(srcPos);
+        while(queue.size()>0){
+            if(availableTaxis.get(queue.get(0))!=null){
+                return availableTaxis.get(queue.get(0));
+            }
+            find[queue.get(0)] = true;
+            List<Integer> con = getConnectList(queue.get(0));
+            for(Integer a:con)
+                queue.add(a);
+            queue.remove(0);//移去队列的头部
+        }
+        return 0;
+    }
     //输出信息到终端,但是为了避免多个线程输出信息的紊乱杂糅,一次只能输出一个
-    synchronized static void outPutInfoToTerminal(String info){
+    static void outPutInfoToTerminal(String info){
+        lock.lock();
         System.out.println(info);
+        lock.unlock();
     }
 }

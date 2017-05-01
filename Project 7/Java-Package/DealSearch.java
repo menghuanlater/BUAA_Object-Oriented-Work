@@ -26,13 +26,13 @@ class DealSearch extends Thread implements GlobalConstant{
     public void run(){
         while(true){
             SearchRequest target = queue.getFrontRequest();
-            String info = null;
+            String info;
             if(target.isTaxiSearch()) {
                 Taxi taxi = Main.taxiSets[target.getTaxiCode()].clone();
                 info = target.toString() + "\t--->\t" + taxi.toString();
             }else{
                 int status = target.getTaxiStatus();
-                info = "处于";
+                info = target.toString()+"\t处于";
                 info += (status==STOP_SERVICE)? "停止服务状态的出租车编号:" :
                         (status==IN_SERVICE)? "正在服务状态(有乘客在车上)的出租车编号:":
                                 (status==WAIT_SERVICE)?"等待服务状态的出租车编号:":

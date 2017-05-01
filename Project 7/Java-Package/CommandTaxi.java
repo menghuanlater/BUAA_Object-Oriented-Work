@@ -75,7 +75,7 @@ class CommandTaxi extends Thread implements GlobalConstant{
         int nextPosition = randomNextPosition(monitorTaxi.getCurrentRow(),monitorTaxi.getCurrentCol(),
                 monitorTaxi.getCurrentPosition());
         int status;
-        if(Math.abs(waitCount-singleWaitMax)<=percific){
+        if(Math.abs(waitCount-singleWaitMax)<= precision){
             waitCount = 0.0;
             status = STOP_SERVICE;
         }else
@@ -130,6 +130,7 @@ class CommandTaxi extends Thread implements GlobalConstant{
         //输出实际行驶路径到文件和控制台
         Main.outPutInfoToTerminal(info);
         Main.safeFilePassenger.writeToFile(allocRequest.toHashString(),info);
+        Main.safeFilePassenger.outPutToFile(allocRequest.toHashString());
     }
     //为了避免代码冗余设计,新增的
     private String driveByShortestPath(List<Integer> shortestPath) throws InterruptedException{

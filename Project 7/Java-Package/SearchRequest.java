@@ -25,7 +25,7 @@ class SearchRequest implements GlobalConstant{
                 case STOPPING:
                     taxiStatus = STOP_SERVICE;
                     break;
-                case SERVIING:
+                case SERVING:
                     taxiStatus = IN_SERVICE;
                     break;
                 case WAITING:
@@ -44,7 +44,8 @@ class SearchRequest implements GlobalConstant{
     int getTaxiStatus(){return taxiStatus;}
     boolean isLegacy(){return legacy;}
     boolean isTaxiSearch(){return taxiCodeSearch;}
+    @Override
     public String toString(){
-        return request+":\t当前时间:"+requestTime+"s\t出租车编号:"+taxiCode;
+        return (taxiCodeSearch)?(request+":\t当前时间:"+requestTime+"s\t出租车编号:"+taxiCode):request;
     }
 }

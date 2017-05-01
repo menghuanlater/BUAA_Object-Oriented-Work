@@ -4,7 +4,7 @@ package core;
  * Created on 17-4-16.
  * 存储所有的全局常量
  */
-interface GlobalConstant {
+interface GlobalConstant{
     //关于出租车的常量值
     int SUM_CARS = 100;//出租车一共100辆
     int STOP_SERVICE  = 0;//停止服务状态
@@ -28,7 +28,7 @@ interface GlobalConstant {
     double singleWaitMax = 20.0;//处于连续等待最大时间
     double stopInterVal = 1.0;//停止运行的时间间隔
     double reactTime = 3.0;//乘客发出请求的响应时间
-    double percific = 0.0001;//浮点数相等的最大误差
+    double precision = 0.0001;//浮点数相等的最大误差
     //有关出租车信用
     int CREDIT_INIT = 0;//信用初始化
     int ADD_PER_GRAB = 1;//每抢单一次信用+
@@ -39,7 +39,7 @@ interface GlobalConstant {
     String PASSENGER = "CR";
     String SEARCH = "SR";
     String WAITING = "waiting";
-    String SERVIING = "serving";
+    String SERVING = "serving";
     String GRABBING = "grabbing";
     String STOPPING = "stopping";
     int ARGUMENT_P = 5;//包含多余分割

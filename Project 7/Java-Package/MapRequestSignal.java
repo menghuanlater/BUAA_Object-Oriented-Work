@@ -48,6 +48,7 @@ class MapRequestSignal implements GlobalConstant{
                     "\t"+taxiSets[i].toString());
             }
         }
+        Main.safeFileRequest.outPutToFile();
     }
     synchronized List getMapSignalAt(int position){
         return map[position];

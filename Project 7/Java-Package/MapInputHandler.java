@@ -7,10 +7,9 @@ import java.io.*;
  * 读取图文件,进行图的存储
  */
 class MapInputHandler implements GlobalConstant{
-    private File mapFile;
     private BufferedReader bufferedReader;
     MapInputHandler(){
-        mapFile = new File(MAP_NAME);
+        File mapFile = new File(MAP_NAME);
         try {
             bufferedReader = new BufferedReader(new FileReader(mapFile));
         } catch (FileNotFoundException e) {

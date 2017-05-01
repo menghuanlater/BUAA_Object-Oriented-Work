@@ -1,6 +1,6 @@
 package core;
 
-import java.awt.*;
+import java.awt.Point;
 import java.util.HashMap;
 import java.util.List;
 
@@ -81,7 +81,6 @@ class Taxi implements GlobalConstant,Cloneable{
     synchronized void clearHashMap(){
         this.grabRequest.clear();
     }
-
     synchronized public String toString(){
         String info = "出租车当前位置:(";
         int row = Main.getRowByCode(currentPosition);
