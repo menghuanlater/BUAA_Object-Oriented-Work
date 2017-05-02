@@ -50,9 +50,10 @@ class MapRequestSignal implements GlobalConstant{
         }
         Main.safeFileRequest.outPutToFile();
     }
-    synchronized List getMapSignalAt(int position){
-        return map[position];
-    }
+    synchronized List<PassengerList> getMapSignalAt(int position){
+        List<PassengerRequest> temp = new ArrayList<>();
+        temp.addAll(map[position]);
+        return temp;
     //request have done,clear it.
     synchronized void clearMapSignal(List<PassengerRequest> prList){
         for (PassengerRequest aPrList : prList) {
