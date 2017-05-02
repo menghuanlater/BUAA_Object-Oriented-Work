@@ -65,7 +65,7 @@ class PassengerRequest implements GlobalConstant{
     /*double getRequestTime() {
         return requestTime;
     }*/
-    void addGrabTaxi(int taxiCode){
+    synchnozied void addGrabTaxi(int taxiCode){
         grabTaxis.add(taxiCode);
     }
     List<Integer> getGrabTaxis(){//由于返回时不需要修改删除,所以无需拷贝.
