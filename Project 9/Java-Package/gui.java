@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -155,6 +156,8 @@ class guigv {
 	public static guiInfo m = new guiInfo();// 地图备份
 	public static CopyOnWriteArrayList<guitaxi> taxilist = new CopyOnWriteArrayList<guitaxi>();// 出租车列表
 	public static CopyOnWriteArrayList<Point> srclist = new CopyOnWriteArrayList<Point>();// 出发点列表
+	public static HashMap<String,Integer> flowmap = new HashMap<String,Integer>();//当前流量
+	public static HashMap<String,Integer> memflowmap = new HashMap<String,Integer>();//之前统计的流量
 	/* GUI */
 	public static JPanel drawboard;
 	public static int[][] colormap;
@@ -167,6 +170,34 @@ class guigv {
 	public static int mousey = 0;
 	public static double percent = 1.0;
 	public static boolean drawstr = false;
+	public static boolean drawflow=false;//是否绘制流量信息
+	private static String Key(int x1,int y1,int x2,int y2){//生成唯一的Key
+		return ""+x1+","+y1+","+x2+","+y2;
+	}
+	public static void AddFlow(int x1,int y1,int x2,int y2){//增加一个道路流量
+		synchronized (guigv.flowmap) {
+			//查询之前的流量数量
+			int count=0;
+			count= guigv.flowmap.get(Key(x1,y1,x2,y2))==null ? 0 : guigv.flowmap.get(Key(x1,y1,x2,y2));
+			//添加流量
+			guigv.flowmap.put(Key(x1,y1,x2,y2), count+1);
+			guigv.flowmap.put(Key(x2,y2,x1,y1), count+1);
+		}
+	}
+	public static int GetFlow(int x1,int y1,int x2,int y2){//查询流量信息
+		synchronized (guigv.memflowmap) {
+			return guigv.memflowmap.get(Key(x1,y1,x2,y2))==null ? 0 : guigv.memflowmap.get(Key(x1,y1,x2,y2));
+		}
+	}
+	@SuppressWarnings("unchecked")
+	public static void ClearFlow(){//清空流量信息
+		synchronized (guigv.flowmap) {
+			synchronized(guigv.memflowmap){
+				guigv.memflowmap=(HashMap<String, Integer>) guigv.flowmap.clone();
+				guigv.flowmap=new HashMap<String, Integer>();
+			}
+		}
+	}
 }
 
 class DrawBoard extends JPanel {// 绘图板类
@@ -189,7 +220,7 @@ class myform extends JFrame {// 我的窗体程序
 	private static final long serialVersionUID = 1L;
 	private int left = 100;
 	private int top = 100;
-	private int width = 600;
+	private int width = 630;
 	private int height = 600;
 
 	public myform() {
@@ -236,10 +267,10 @@ class myform extends JFrame {// 我的窗体程序
 		button4.setText("清除轨迹");
 		button4.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//清除colormap
-				for(int i=0;i<85;i++){
-					for(int j=0;j<85;j++){
-						guigv.colormap[i][j]=0;
+				// 清除colormap
+				for (int i = 0; i < 85; i++) {
+					for (int j = 0; j < 85; j++) {
+						guigv.colormap[i][j] = 0;
 					}
 				}
 				guigv.drawboard.repaint();
@@ -247,10 +278,18 @@ class myform extends JFrame {// 我的窗体程序
 		});
 		/* 设置复选框属性 */
 		JCheckBox check1 = new JCheckBox("显示位置");
-		check1.setBounds(450, 515, 200, 40);
+		check1.setBounds(450, 515, 80, 40);
 		check1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				guigv.drawstr = check1.isSelected();
+				guigv.drawboard.repaint();
+			}
+		});
+		JCheckBox check2 = new JCheckBox("显示流量");
+		check2.setBounds(530, 515, 80, 40);
+		check2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				guigv.drawflow = check2.isSelected();
 				guigv.drawboard.repaint();
 			}
 		});
@@ -319,6 +358,7 @@ class myform extends JFrame {// 我的窗体程序
 		c.add(button3);
 		c.add(button4);
 		c.add(check1);
+		c.add(check2);
 		c.add(drawboard);
 		setVisible(true);// 使窗体可见
 		setAlwaysOnTop(true);// 设置窗体置顶
@@ -375,25 +415,40 @@ class brush {// 画笔
 					yoffset = 3;
 				}
 				g.setStroke(new BasicStroke(2));
+				g.setFont(new Font("Arial", Font.PLAIN, (int) (10 * guigv.percent)));
 				if (guigv.m.map[i][j] == 2 || guigv.m.map[i][j] == 3) {
 					if (drawcolor && colormap[i][j] == 1 && colormap[i + 1][j] == 1)
 						g.setColor(Color.RED);
 					else
 						g.setColor(Color.BLACK);
-					g.drawLine((int) ((j * factor + guigv.xoffset) * guigv.percent),
+					int memj=(int) ((j * factor + guigv.xoffset) * guigv.percent);
+					g.drawLine(memj,
 							(int) ((i * factor + guigv.yoffset) * guigv.percent),
-							(int) ((j * factor + guigv.xoffset) * guigv.percent),
+							memj,
 							(int) (((i + 1) * factor + guigv.yoffset) * guigv.percent));
+					//绘制道路流量
+					if(guigv.drawflow){
+						g.setColor(Color.BLUE);
+						g.drawString(""+ guigv.GetFlow(i, j, i+1, j), memj,
+								(int) (((i + 0.5) * factor + guigv.yoffset) * guigv.percent));
+					}
 				}
 				if (guigv.m.map[i][j] == 1 || guigv.m.map[i][j] == 3) {
 					if (drawcolor && colormap[i][j] == 1 && colormap[i][j + 1] == 1)
 						g.setColor(Color.RED);
 					else
 						g.setColor(Color.BLACK);
+					int memi=(int) ((i * factor + guigv.yoffset) * guigv.percent);
 					g.drawLine((int) ((j * factor + guigv.xoffset) * guigv.percent),
-							(int) ((i * factor + guigv.yoffset) * guigv.percent),
+							memi,
 							(int) (((j + 1) * factor + guigv.xoffset) * guigv.percent),
-							(int) ((i * factor + guigv.yoffset) * guigv.percent));
+							memi);
+					//绘制道路流量
+					if(guigv.drawflow){
+						g.setColor(Color.BLUE);
+						g.drawString(""+ guigv.GetFlow(i, j, i, j+1), (int) (((j + 0.5) * factor + guigv.xoffset) * guigv.percent),
+								memi);
+					}
 				}
 				int targetWidth;
 				if (taximap[i][j] == 3) {
@@ -506,8 +561,16 @@ class TaxiGUI {// GUI接口类
 		new myform();
 		Thread th = new Thread(new Runnable() {
 			public void run() {
+				int timewindow=200;//时间窗设置为200ms
+				int timecount=0;//计时
 				while (true) {
 					gv.stay(100);
+					timecount+=100;
+					if(timecount>timewindow){
+						timecount=0;
+						//重新记录流量信息
+						guigv.ClearFlow();
+					}
 					guigv.drawboard.repaint();
 				}
 			}
@@ -515,21 +578,73 @@ class TaxiGUI {// GUI接口类
 		th.start();
 		guigv.m.initmatrix();// 初始化邻接矩阵
 	}
-
-	public synchronized void SetTaxiStatus(int index, Point point, int status) {
+	public void SetTaxiStatus(int index, Point point, int status) {
 		guitaxi gt = guigv.taxilist.get(index);
+		guigv.AddFlow(gt.x, gt.y, point.x, point.y);//统计流量
 		gt.x = point.x;
 		gt.y = point.y;
 		gt.status = status;
 	}
 
-	public synchronized void RequestTaxi(Point src, Point dst) {
+	public void RequestTaxi(Point src, Point dst) {
 		// 将src周围标红
 		guigv.srclist.add(src);
 		// 计算最短路径的值,通过一个窗口弹出
 		//int distance = guigv.m.distance(src.x, src.y, dst.x, dst.y);
 		//debugform form1 = new debugform();
 		//form1.text1.setText("从(" + src.x + "," + src.y + ")到(" + dst.x + "," + dst.y + ")的最短路径长度是" + distance);
+	}
+
+	public void SetRoadStatus(Point p1, Point p2, int status) {// status 0关闭 1打开
+		synchronized(guigv.m.map){
+			int di = p1.x - p2.x;
+			int dj = p1.y - p2.y;
+			Point p = null;
+			if (di == 0) {// 在同一水平线上
+				if (dj == 1) {// p2-p1
+					p = p2;
+				} else if (dj == -1) {// p1-p2
+					p = p1;
+				} else {
+					return;
+				}
+				if (status == 0) {// 关闭
+					if (guigv.m.map[p.x][p.y] == 3) {
+						guigv.m.map[p.x][p.y] = 2;
+					} else if (guigv.m.map[p.x][p.y] == 1) {
+						guigv.m.map[p.x][p.y] = 0;
+					}
+				} else if (status == 1) {// 打开
+					if (guigv.m.map[p.x][p.y] == 2) {
+						guigv.m.map[p.x][p.y] = 3;
+					} else if (guigv.m.map[p.x][p.y] == 0) {
+						guigv.m.map[p.x][p.y] = 1;
+					}
+				}
+			} else if (dj == 0) {// 在同一竖直线上
+				if (di == 1) {// p2-p1
+					p = p2;
+				} else if (di == -1) {// p1-p2
+					p = p1;
+				} else {
+					return;
+				}
+				if (status == 0) {// 关闭
+					if (guigv.m.map[p.x][p.y] == 3) {
+						guigv.m.map[p.x][p.y] = 1;
+					} else if (guigv.m.map[p.x][p.y] == 2) {
+						guigv.m.map[p.x][p.y] = 0;
+					}
+				} else if (status == 1) {// 打开
+					if (guigv.m.map[p.x][p.y] == 1) {
+						guigv.m.map[p.x][p.y] = 3;
+					} else if (guigv.m.map[p.x][p.y] == 0) {
+						guigv.m.map[p.x][p.y] = 2;
+					}
+				}
+			}
+			return;
+		}
 	}
 
 	public TaxiGUI() {

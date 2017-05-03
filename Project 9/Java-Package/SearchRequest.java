@@ -11,6 +11,11 @@ class SearchRequest implements GlobalConstant{
     private String request;
     private boolean legacy;
     SearchRequest(String request,String idOrStatus,double requestTime){
+        /*@REQUIRES:request & idOrStatus!=null and requestTime>=0.0
+        @MODIFIES:\all member vars
+        @EFFECTS:normal_behavior:提取字符串信息,构造出一个完整的查询请求请求.
+                 非法字符串==>exceptional_behavior:(Exception) this.legacy = false;
+        */
         this.request = request;
         this.legacy = true;
         this.requestTime = requestTime;
@@ -39,13 +44,39 @@ class SearchRequest implements GlobalConstant{
         }
     }
     int getTaxiCode() {
+        /*@REQUIRES:None
+        @MODIFIES:None
+        @EFFECTS:返回taxiCode的值
+        */
         return taxiCode;
     }
-    int getTaxiStatus(){return taxiStatus;}
-    boolean isLegacy(){return legacy;}
-    boolean isTaxiSearch(){return taxiCodeSearch;}
+    int getTaxiStatus(){
+        /*@REQUIRES:None
+        @MODIFIES:None
+        @EFFECTS:返回taxiStatus的值
+        */
+        return taxiStatus;
+    }
+    boolean isLegacy(){
+        /*@REQUIRES:None
+        @MODIFIES:None
+        @EFFECTS:返回legacy的值
+        */
+        return legacy;
+    }
+    boolean isTaxiSearch(){
+        /*@REQUIRES:None
+        @MODIFIES:None
+        @EFFECTS:返回taxiCodeSearch的值
+        */
+        return taxiCodeSearch;
+    }
     @Override
     public String toString(){
+        /*@REQUIRES:None
+        @MODIFIES:None
+        @EFFECTS:返回请求的字符串形式
+        */
         return (taxiCodeSearch)?(request+":\t当前时间:"+requestTime+"s\t出租车编号:"+taxiCode):request;
     }
 }

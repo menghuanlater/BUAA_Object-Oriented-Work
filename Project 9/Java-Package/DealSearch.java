@@ -14,6 +14,11 @@ class DealSearch extends Thread implements GlobalConstant{
     private RequestQueue<SearchRequest> queue;
     private BufferedWriter bufferedWriter;
     DealSearch(RequestQueue<SearchRequest> queue){
+        /*@REQUIRES:queue!=null
+        @MODIFIES:this.queue,this.bufferedWriter
+        @EFFECTS:normal_behavior:给this.queue赋值,正常打开文件输出流
+                 文件输出流打开失败==>exceptional_behavior:(IOException)打印异常处理栈
+        */
         this.queue = queue;
         Path outFile = Paths.get(SEARCH_OUT);
         try {
@@ -23,6 +28,10 @@ class DealSearch extends Thread implements GlobalConstant{
         }
     }
     public void run(){
+        /*@REQUIRES:None
+        @MODIFIES:this.queue(内部实现修改),bufferedWriter,System.out
+        @EFFECTS:不停扫描请求队列，没有则等待，有则取出处理搜索请求,将处理信息输出到终端以及文件输出流
+        */
         while(true){
             SearchRequest target = queue.getFrontRequest();
             String info;

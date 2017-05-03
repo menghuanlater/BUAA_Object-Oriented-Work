@@ -9,14 +9,25 @@ import java.io.*;
 class MapInputHandler implements GlobalConstant{
     private BufferedReader bufferedReader;
     MapInputHandler(){
+        /*@REQUIRES:None
+        @MODIFIES:bufferedReader,System.out
+        @EFFECTS:normal_behavior:如果文件存在==>读取文件内容
+                 文件输入流打开失败==>exceptional_behavior:(FileNotFoundException)终端输出提示,结束程序
+        */
         File mapFile = new File(MAP_NAME);
         try {
             bufferedReader = new BufferedReader(new FileReader(mapFile));
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            System.out.println("not found map.txt");
+            System.exit(0);
         }
     }
     void readTheMapFile() throws IOException {
+        /*@REQUIRES:None
+        @MODIFIES:bufferedReader,Main.matrix,Main.matrixGui
+        @EFFECTS:normal_behavior:如果文件输入流读取正常==>读取地图,修改邻接矩阵,如果发现地图不合法则调用Main.illegalMap()结束程序
+                 文件输入流读取异常==>exceptional_behavior:(IOException)throw it.
+        */
         int rowCount = 0;
         String line;
         while((line=bufferedReader.readLine())!=null && (!line.equals("")) && rowCount<ROW_NUMBER){

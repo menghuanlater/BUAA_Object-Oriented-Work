@@ -17,12 +17,21 @@ class RequestInputHandler extends Thread implements GlobalConstant {
     private BufferedReader input;
     RequestInputHandler(RequestQueue<SearchRequest> srQueue, RequestQueue<PassengerRequest> prQueue,
                         RequestQueue<RoadRequest> rrQueue){
+        /*@REQUIRES:(\all argument !=null)
+        @MODIFIES:\all member vars
+        @EFFECTS:构造
+        */
         this.prQueue = prQueue;
         this.srQueue =srQueue;
         this.rrQueue = rrQueue;
         this.input = new BufferedReader(new InputStreamReader(System.in));
     }
     public void run(){
+        /*@REQUIRES:(\all argument !=null)
+        @MODIFIES:\all member vars,System.out,
+        @EFFECTS:normal_behavior:不停获取输入的请求,按类型送入对应的队列中,非法请求则报错
+                 输入读取异常==>exceptional_behavior:(IOException)打印异常处理栈
+        */
         String line;
         try {
             while(!(line = input.readLine().replaceAll(" ","")).equalsIgnoreCase("end")){
@@ -68,6 +77,10 @@ class RequestInputHandler extends Thread implements GlobalConstant {
     }
     //返回true代表不是同质请求
     private boolean checkSameRequest(List<PassengerRequest> objList,PassengerRequest target){
+        /*@REQUIRES:(\all argument !=null)
+        @MODIFIES:None
+        @EFFECTS:返回请求target是否已经在objList中
+        */
         boolean check = true;
         for(PassengerRequest temp:objList){
             if(target.getStartCode()==temp.getStartCode() && target.getEndCode()==temp.getEndCode()){

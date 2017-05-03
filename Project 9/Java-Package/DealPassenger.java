@@ -11,9 +11,18 @@ import java.util.List;
 class AllocTaxi extends Thread implements GlobalConstant{
     private List<PassengerRequest> copeList;
     AllocTaxi(List<PassengerRequest> copeList){
+        /*@REQUIRES:copeList.size()>0//为空没有任何意义传入
+        @MODIFIES:this.copeList
+        @EFFECTS:构造
+        */
         this.copeList = copeList;
     }
     public void run(){
+        /*@REQUIRES:None
+        @MODIFIES:Main.mapSignal
+        @EFFECTS:normal_behavior:将请求辐射的区域打上标记,睡眠3s，为每个请求寻求最佳出租车.
+                Thread.sleep()出现异常==>exceptional_behavior(InterruptedException) throw it.
+        */
         try {
             //首先给相关辐射节点打上信号
             Main.mapSignal.setMapSignal(copeList);
@@ -27,14 +36,19 @@ class AllocTaxi extends Thread implements GlobalConstant{
         }
     }
     private void chooseBestTaxi(PassengerRequest target){
+        /*@REQUIRES:target!=null
+        @MODIFIES:None
+        @EFFECTS:normal_behavior:为请求分配最佳出租车,没有可分配出租车,输出无响应.
+        */
         List<Integer> taxisCode = target.getGrabTaxis();
         if(taxisCode.size()==0) Main.outPutInfoToTerminal(target.getRequest()+" 没有出租车响应.");
         else{
             List<Taxi> taxis = new ArrayList<>();
-            for (Integer aTaxisCode : taxisCode){
-                Taxi temp = Main.taxiSets[aTaxisCode].clone();
-                if(temp.getCurrentStatus()==WAIT_SERVICE)
-                    taxis.add(Main.taxiSets[aTaxisCode].clone());
+            //System.out.println("the size:"+taxisCode.size());
+            for (Integer aTaxisCode : taxisCode) {
+                Taxi temp = (Main.taxiSets[aTaxisCode]).clone();
+                if (temp.getCurrentStatus() == WAIT_SERVICE)
+                    taxis.add(temp);
             }
             if(taxis.size()==0){
                 Main.outPutInfoToTerminal(target.getRequest()+" 没有出租车响应.");
@@ -67,9 +81,17 @@ class AllocTaxi extends Thread implements GlobalConstant{
 public class DealPassenger extends Thread implements GlobalConstant{
     private RequestQueue<PassengerRequest> queue;
     DealPassenger(RequestQueue<PassengerRequest> queue){
+        /*@REQUIRES:queue!=null
+        @MODIFIES:this.queue
+        @EFFECTS:构造
+        */
         this.queue = queue;
     }
     public void run(){
+        /*@REQUIRES:None
+        @MODIFIES:this.queue(内部实现修改)
+        @EFFECTS:不停扫描请求队列，没有则等待，有则取出分配线程
+        */
         while (true){
             AllocTaxi allocTaxi = new AllocTaxi(queue.getAllRequest());
             allocTaxi.start();

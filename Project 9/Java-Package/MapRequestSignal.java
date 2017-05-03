@@ -13,10 +13,20 @@ import java.util.List;
 class MapRequestSignal implements GlobalConstant{
     private List[] map = new List[NODE_NUM];
     MapRequestSignal(){
+        /*@REQUIRES:None
+        @MODIFIES:this.map
+        @EFFECTS:构造,实例化数组
+        */
         for(int i=0;i<map.length;i++)
             map[i] = new ArrayList<PassengerRequest>();
     }
     synchronized void setMapSignal(List<PassengerRequest> prList){
+        /*@REQUIRES:prList.size()>0
+        @MODIFIES:this.map,Main.safeFileRequest,Main.gui
+        @EFFECTS:将请求辐射区域打上标记,并搜寻请求发出时周围所有的出租车,打印状态信息
+        @THREAD_REQUIRES:\locked(map)
+        @THREAD_EFFECTS:\locked(),整个方法同步
+        */
         //首先将所有出租车拷贝下来.
         HashMap<Integer,List<PassengerRequest>> hashMap = new HashMap<>(50);
         Taxi[] taxiSets = new Taxi[SUM_CARS];
@@ -50,12 +60,25 @@ class MapRequestSignal implements GlobalConstant{
         }
         Main.safeFileRequest.outPutToFile();
     }
-    synchronized List<PassengerList> getMapSignalAt(int position){
+    synchronized List<PassengerRequest> getMapSignalAt(int position){
+        /*@REQUIRES:0<=position<=6399
+        @MODIFIES:this.map
+        @EFFECTS:返回所有在编号为position节点上标记的请求
+        @THREAD_REQUIRES:\locked(map)
+        @THREAD_EFFECTS:\locked(),整个方法同步
+        */
         List<PassengerRequest> temp = new ArrayList<>();
         temp.addAll(map[position]);
         return temp;
+    }
     //request have done,clear it.
     synchronized void clearMapSignal(List<PassengerRequest> prList){
+        /*@REQUIRES:prList.size()>0
+        @MODIFIES:this.map
+        @EFFECTS:请求响应时间结束,清除标记信号
+        @THREAD_REQUIRES:\locked(map)
+        @THREAD_EFFECTS:\locked(),整个方法同步
+        */
         for (PassengerRequest aPrList : prList) {
             List<Integer> temp = aPrList.getCtrlArea();
             for (Integer aTemp : temp) {

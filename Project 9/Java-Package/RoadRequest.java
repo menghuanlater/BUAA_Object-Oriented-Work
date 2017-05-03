@@ -11,6 +11,11 @@ class RoadRequest implements GlobalConstant{
     private int nextCol;
     private int type;
     RoadRequest(String first,String next,String type) {
+        /*@REQUIRES:first & next & type!=null;
+        @MODIFIES:\all member vars
+        @EFFECTS:normal_behavior:提取字符串信息,构造出一个完整的道路请求.
+                 非法字符串==>exceptional_behavior:(Exception) this.legacy = false;
+        */
         this.legacy = true;
         switch (type) {
             case OPEN_ROAD:
@@ -46,28 +51,58 @@ class RoadRequest implements GlobalConstant{
         }
     }
     private boolean checkRowCol(int row, int col){
+        /*@REQUIRES:None
+        @MODIFIES:None
+        @EFFECTS:返回(row,col)是否合法
+        */
         return (row>=0) && (row<ROW_NUMBER) && (col>=0) && (col<COL_NUMBER);
     }
 
-    boolean isLegacy(){return legacy;}
+    boolean isLegacy(){
+        /*@REQUIRES:None
+        @MODIFIES:None
+        @EFFECTS:返回legacy的值
+        */
+        return legacy;
+    }
 
     int getFirstRow() {
+        /*@REQUIRES:None
+        @MODIFIES:None
+        @EFFECTS:返回firstRow的值
+        */
         return firstRow;
     }
 
     int getFirstCol() {
+        /*@REQUIRES:None
+        @MODIFIES:None
+        @EFFECTS:返回firstCol的值
+        */
         return firstCol;
     }
 
     int getNextRow() {
+        /*@REQUIRES:None
+        @MODIFIES:None
+        @EFFECTS:返回nextRow的值
+        */
         return nextRow;
     }
 
     int getNextCol() {
+        /*@REQUIRES:None
+        @MODIFIES:None
+        @EFFECTS:返回nextCol的值
+        */
         return nextCol;
     }
 
     int getType() {
+        /*@REQUIRES:None
+        @MODIFIES:None
+        @EFFECTS:返回type的值
+        */
         return type;
     }
 }
