@@ -30,6 +30,7 @@ class RequestInputHandler extends Thread implements GlobalConstant {
                 String[] requests = line.split(";");
                 if(requests.length==0) continue;
                 for (String obj : requests) {
+                    if(obj.equals(""))continue;
                     if (obj.charAt(0) != '[' || obj.charAt(obj.length() - 1) != ']') {
                         Main.outPutInfoToTerminal(obj + " is illegal.");
                         continue;
