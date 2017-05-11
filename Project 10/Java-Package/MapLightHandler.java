@@ -41,7 +41,7 @@ public class MapLightHandler implements GlobalConstant{
         return true;
     }
     void readTheMapFile() throws IOException {
-        /*@REQUIRES:mapReader and lightReader is Ok.
+        /*@REQUIRES:mapReader and lightReader is Ok; Main.matrix,Main.matrixGui,Main.matrixInit,Main.redGreenLight all Ok.
         @MODIFIES:mapReader,lightReader,Main.matrix,Main.matrixInit,Main.matrixGui，Main.redGreenLight.globalLight,
                  Main.redGreenLight.lightSets.
         @EFFECTS:normal_behavior:如果文件输入流读取正常==>读取地图,修改邻接矩阵,如果发现地图不合法则调用Main.illegalMap()结束程序

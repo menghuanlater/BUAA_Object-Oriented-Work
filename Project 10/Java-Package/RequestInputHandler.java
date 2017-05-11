@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created on 17-4-16.
@@ -98,7 +97,7 @@ public class RequestInputHandler extends Thread implements GlobalConstant {
     }
     //返回true代表不是同质请求
     private boolean checkSameRequest(List<PassengerRequest> objList,PassengerRequest target){
-        /*@REQUIRES:(\all argument !=null)
+        /*@REQUIRES:(\all argument !=null) && target.legacy==true && (\all objList.get(i).legacy==true,0<=i<objList.size())
         @MODIFIES:None
         @EFFECTS:返回请求target是否已经在objList中
         */

@@ -62,7 +62,7 @@ public class SearchRequest implements GlobalConstant{
             return false;
         if(taxiStatus<0 || taxiStatus>3)
             return false;
-        if(requestTime<0)
+        if(requestTime<0.0)
             return false;
         if(request==null)
             return false;

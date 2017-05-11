@@ -25,7 +25,7 @@ public class RedGreenLight extends Thread implements GlobalConstant{
     }
     /*repOk 对于globalLight以及lightSets无需检查是否为null的情况(final)
     check:1.interval>=50 && interval<=100
-    2.lastChangeTime>0
+    2.lastChangeTime>=0
     3.\all globalLight[i] is in {0,1,2},0<=i<NODE_NUM;
     4.\all lightSets.get(i)!=null && lightSets.get(i) is instanceof Integer &&
     0<=lightSets.get(i)<=6399 && (if i!=j ==> lightSets.get(i).equals(lightSets.get(j))==false),
@@ -37,7 +37,7 @@ public class RedGreenLight extends Thread implements GlobalConstant{
          */
         if(interVal<50 || interVal>100)
             return false;
-        if(lastChangeTime<=0)
+        if(lastChangeTime<0)
             return false;
         for(int i=0;i<NODE_NUM;i++){
             if(globalLight[i]<0 || globalLight[i]>2)
@@ -81,7 +81,7 @@ public class RedGreenLight extends Thread implements GlobalConstant{
     }
     //初始化函数
     private void loadInitLight(){
-        /*@REQUIRES:None
+        /*@REQUIRES:Main.gui有效
         @MODIFIES:None
         @EFFECTS:调用Main.gui中的方法初始化道路红绿灯(方法内部修改)
          */
@@ -90,7 +90,7 @@ public class RedGreenLight extends Thread implements GlobalConstant{
         }
     }
     private synchronized void changeLight(){
-        /*@REQUIRES:None
+        /*@REQUIRES:Main.gui有效
         @MODIFIES:globalLight
         @EFFECTS:统一改变所有有红绿灯路口红绿灯的颜色
         @THREAD_REQUIRES:\locked(globalLight)
@@ -119,7 +119,7 @@ public class RedGreenLight extends Thread implements GlobalConstant{
     }
     //@当道路关闭导致相关路口不是交叉路口,红绿灯失效,直接从此点挖除
     synchronized void shutLight(int firstCode,int secondCode){
-        /*@REQUIRES:0<=firstCode,secondCode<=6399
+        /*@REQUIRES:0<=firstCode,secondCode<=6399 && Main.gui有效
         @MODIFIES:globalLight
         @EFFECTS:根据修改后道路是否成为非交叉路口选择是否关闭此道路的红绿灯并调用gui方法
         @THREAD_REQUIRES:\locked(globalLight)
@@ -135,7 +135,7 @@ public class RedGreenLight extends Thread implements GlobalConstant{
         }
     }
     private int getConnectNum(int targetCode){
-        /*@REQUIRES:0<=targetCode<=6399
+        /*@REQUIRES:0<=targetCode<=6399 && Main.matrix有效
         @MODIFIES:None
         @EFFECTS:返回与targetCode所代表的结点相连的节点数
          */

@@ -25,14 +25,15 @@ public class MapRequestSignal implements GlobalConstant{
     */
     public boolean repOk(){
         for(int i=0;i<NODE_NUM;i++){
-            Object x = map[i];
+            List x = map[i];
             if(x==null) return false;
             if(!(x instanceof ArrayList)) return false;
         }
         return true;
     }
     synchronized void setMapSignal(List<PassengerRequest> prList){
-        /*@REQUIRES:prList.size()>0 && \all prList.get(i).legacy==true,0<=i<prList.size()
+        /*@REQUIRES:prList.size()>0 && \all prList.get(i).legacy==true,0<=i<prList.size() && Main.taxiSets与Main.safeFileRequest有效
+        && Main.gui有效
         @MODIFIES:this.map
         @EFFECTS:将请求辐射区域打上标记,并搜寻请求发出时周围所有的出租车,调用其他类方法打印状态信息并修改相关属性(其他类内部修改)
         @THREAD_REQUIRES:\locked(map)
@@ -93,7 +94,8 @@ public class MapRequestSignal implements GlobalConstant{
         for (PassengerRequest aPrList : prList) {
             List<Integer> temp = aPrList.getCtrlArea();
             for (Integer aTemp : temp) {
-                map[aTemp].remove(0);
+                if(map[aTemp].size()>0)
+                    map[aTemp].remove(0);
             }
         }
     }

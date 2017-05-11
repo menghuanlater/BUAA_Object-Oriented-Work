@@ -31,16 +31,16 @@ class AllocTaxi extends Thread implements GlobalConstant{
          */
         if(copeList==null) return false;
         if(copeList.size()==0) return false;
-        for(int i=0;i<copeList.size();i++){
-            Object x = copeList.get(i);
-            if(x==null) return false;
-            if(!(x instanceof PassengerRequest)) return false;
-            if(!((PassengerRequest) x).isLegacy()) return false;
+        for (PassengerRequest aCopeList : copeList) {
+            Object x = aCopeList;
+            if (x == null) return false;
+            if (!(x instanceof PassengerRequest)) return false;
+            if (!((PassengerRequest) x).isLegacy()) return false;
         }
         return true;
     }
     public void run(){
-        /*@REQUIRES:None
+        /*@REQUIRES:Main.mapSignal have been build
         @MODIFIES:None
         @EFFECTS:normal_behavior:调用相关类方法将请求辐射的区域打上标记,睡眠3s,并清除辐射信号,调用chooseBestTaxi为每个请求寻求最佳出租车.
                 Thread.sleep()出现异常==>exceptional_behavior(InterruptedException) 打印异常处理栈信息.
@@ -58,7 +58,7 @@ class AllocTaxi extends Thread implements GlobalConstant{
         }
     }
     private void chooseBestTaxi(PassengerRequest target){
-        /*@REQUIRES:target!=null && target.legacy = true.
+        /*@REQUIRES:target!=null && target.legacy = true && Main.taxiSets以及Main.commandTaxis集合对象全部实例化且有效
         @MODIFIES:None
         @EFFECTS:normal_behavior:为请求分配最佳出租车,没有可分配出租车,输出无响应.如果有响应的出租车,调用Main类中的方法输出信息到终端
         */

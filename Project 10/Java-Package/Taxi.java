@@ -19,8 +19,8 @@ public class Taxi implements GlobalConstant,Cloneable{
     private int currentRow;
     private int currentCol;
     private HashSet<String> grabRequest;
-    Taxi(int code){
-        /*@REQUIRES:0<=code<=99
+    public Taxi(int code){
+        /*@REQUIRES:0<=code<=99 && Main.gui有效
         @MODIFIES:\all member vars
         @EFFECTS:构造
         */
@@ -80,12 +80,13 @@ public class Taxi implements GlobalConstant,Cloneable{
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
-        assert taxi!=null;/* if copy failed,throw error. */
+        //assert taxi!=null;/* if copy failed,throw error. */
         return taxi;
     }
 
     synchronized void setCurrentStatus(int currentStatus) {
-        /*@REQUIRES:Contains(currentStatus).{STOP_SERVICE,WAIT_SERVICE,IN_SERVICE,GRAB_SERVICE,STOP_GRAB,STOP_ACHIEVE};
+        /*@REQUIRES:Contains(currentStatus).{STOP_SERVICE,WAIT_SERVICE,IN_SERVICE,GRAB_SERVICE,STOP_GRAB,STOP_ACHIEVE} &&
+            Main.gui有效
         @MODIFIES:this.currentStatus
         @EFFECTS:修改出租车的状态,更新对应gui上出租车的状态(gui内部方法实现修改)
         @THREAD_REQUIRES:\locked(this)
@@ -106,7 +107,7 @@ public class Taxi implements GlobalConstant,Cloneable{
     }
     //设置出租车当前的位置
     synchronized void setCurrentPosition(int currentPosition) {
-        /*@REQUIRES:0<=currentPosition<=6399
+        /*@REQUIRES:0<=currentPosition<=6399 && Main.gui有效
         @MODIFIES:this.currentPosition,this.currentRow,this.currentCol
         @EFFECTS:修改出租车的位置,更新gui(ignore exception because this exception come from gui)
         @THREAD_REQUIRES:\locked(this)
@@ -134,7 +135,7 @@ public class Taxi implements GlobalConstant,Cloneable{
     }*/
 
     synchronized void searchAblePick(){
-        /*@REQUIRES:None
+        /*@REQUIRES:Main.mapSignal与Main.safeFilePassenger有效
         @MODIFIES:grabRequest
         @EFFECTS:查询出租车在当前位置是否存在该出租车可以抢的单,可以抢单,则将该出租车编号写入对应被抢请求的grabTaxis中(类内部修改),
                 将所抢请求的HashString写入HashSet中,并将抢单的信息输出到文件以及终端(类内部实现)

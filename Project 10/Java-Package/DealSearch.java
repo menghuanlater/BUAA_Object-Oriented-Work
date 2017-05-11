@@ -32,7 +32,7 @@ public class DealSearch extends Thread implements GlobalConstant{
     }
     /*@repOk.
     check:queue!=null && queue is instanceof RequestQueue && bufferedWriter!=null
-          && bufferedWriter is instanceof BufferedWriter &&
+          && bufferedWriter is instanceof BufferedWriter
      */
     public boolean repOk(){
         /*
@@ -47,7 +47,7 @@ public class DealSearch extends Thread implements GlobalConstant{
         return true;
     }
     public void run(){
-        /*@REQUIRES:None
+        /*@REQUIRES:Main.taxiSets have been build(100辆出租车实例化)
         @MODIFIES:bufferedWriter
         @EFFECTS:不停扫描请求队列，没有则等待，有则取出处理搜索请求,调用相关类方法将处理信息输出到终端以及文件输出流
                 文件输出流写入失败==>exceptional_behavior:(IOException)打印异常处理栈信息

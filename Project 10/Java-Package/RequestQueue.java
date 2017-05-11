@@ -29,6 +29,7 @@ public class RequestQueue<T> implements GlobalConstant{
         @THREAD_REQUIRES:\locked(requestSets)
         @THREAD_EFFECTS:\locked();方法同步
         */
+        //assert this.repOk();
         if(requests.size()>0) {
             requestSets.addAll(requests);
             notifyAll();
@@ -43,6 +44,7 @@ public class RequestQueue<T> implements GlobalConstant{
         @THREAD_REQUIRES:\locked(requestSets)
         @THREAD_EFFECTS:\locked();方法同步
         */
+        //assert this.repOk();
         if(requestSets.size()==0){
             try {
                 wait();
@@ -62,6 +64,7 @@ public class RequestQueue<T> implements GlobalConstant{
         @THREAD_REQUIRES:\locked(requestSets)
         @THREAD_EFFECTS:\locked();方法同步
         */
+        //assert this.repOk();
         if(requestSets.size()==0){
             try {
                 wait();

@@ -27,7 +27,7 @@ interface DriveMode{
     int N_E = 12;//北向东右转
 }
 
-class CommandTaxi extends Thread implements GlobalConstant,DriveMode{
+public class CommandTaxi extends Thread implements GlobalConstant,DriveMode{
     /*
     @Overview:出租车控制线程,通过出租车的当前状态位置以及是否被分配请求等,执行相关的调度处理以及状态
     位置转换,主要通过sleep()睡眠模拟出租车行驶
@@ -38,8 +38,8 @@ class CommandTaxi extends Thread implements GlobalConstant,DriveMode{
     private double waitCount = 0.0;//等待服务时间计数器
     private boolean checkRoadChange;//改路信号
     private int frontPosition;//出租车之前的位置
-    CommandTaxi(Taxi monitorTaxi,int taxiCode){
-        /*@REQUIRES:monitorTaxi!=null && taxiCode>=0 && taxiCode<=99
+    public CommandTaxi(Taxi monitorTaxi, int taxiCode){
+        /*@REQUIRES:monitorTaxi!=null && taxiCode>=0 && taxiCode<=99 && monitorTaxi.taxiCode==taxiCode
         @MODIFIES:this.monitorTaxi,this.taxiCode,this.allocRequest,this.checkRoadChange,this.frontPosition
         @EFFECTS:类对象构造
         */
@@ -51,18 +51,24 @@ class CommandTaxi extends Thread implements GlobalConstant,DriveMode{
     }
     /*@repOk
     check:0<=taxiCode<=99; monitorTaxi!=null &&  monitorTaxi is an instance of Taxi && monitorTaxi.taxiCode == taxiCode;
-    -1<=frontPosition<=6399 (由于一开始初始化在-1)
-    其余成员无需检查
+    -1<=frontPosition<=6399 (由于一开始初始化在-1) && waitCount>=0.0 && (if monitorTaxi.status==GRAB_SERVICE~IN_SERVICE==>
+    allocRequest!=null && allocRequest.legacy==true)
      */
     public boolean repOk(){
         /*@EFFECTS:\result = invariant(this)
          */
         if(taxiCode<0 || taxiCode>99) return false;
         if(monitorTaxi==null) return false;
+        if(waitCount<0.0) return false;
         Object x = monitorTaxi;
         if(!(x instanceof Taxi)) return false;
         if(monitorTaxi.getTaxiCode()!=taxiCode) return false;
         if(frontPosition<-1 || frontPosition>6399) return false;
+        if(monitorTaxi.getCurrentStatus()==GRAB_SERVICE || monitorTaxi.getCurrentStatus()==STOP_GRAB ||
+                monitorTaxi.getCurrentStatus()==IN_SERVICE){
+            if(allocRequest==null || !allocRequest.isLegacy())
+                return false;
+        }
         return true;
     }
     public void run(){
@@ -103,6 +109,9 @@ class CommandTaxi extends Thread implements GlobalConstant,DriveMode{
         @MODIFIES:this.allocRequest,this.monitorTaxi
         @EFFECTS:设置出租车即将执行的请求,修改出租车的相关状态,清空该出租车抢到的订单集合,调用输出信息到终端以及文件的其他类方法
         */
+        /*//------------------------------//
+        assert get.repOk();
+        //------------------------------//*/
         this.allocRequest = get;
         //将交付信息输入到HashMap
         String info = "请求被"+taxiCode+"号车接手.";
@@ -113,7 +122,7 @@ class CommandTaxi extends Thread implements GlobalConstant,DriveMode{
     }
     //出现道路关闭后,如果车处于serving或者grabbing状态,则将check置为true
     void setCheckRoadChange(){
-        /*@REQUIRES:None
+        /*@REQUIRES:monitorTaxi!=null && monitorTaxi.taxiCode == this.taxiCode
         @MODIFIES:this.checkRoadChange
         @EFFECTS:如果出租车此时为接单状态或者已经接到乘客正在赶往目的地的状态 ==> checkRoadChange=true;
         */
@@ -124,10 +133,13 @@ class CommandTaxi extends Thread implements GlobalConstant,DriveMode{
     //当出租车处于等待服务状态,则生成一个随机化的下一个去往位置(加上流量最小判断)
     private int randomNextPosition(int currentRow,int currentCol,int currentPosition){
         /*@REQUIRES:0=<(currentRow and currentCol)<=79 && 0<=currentPosition<=6399 &&
-                    Main.getCodeByRowCol(currentRow,currentCol)==currentPosition
+                    Main.getCodeByRowCol(currentRow,currentCol)==currentPosition && (Main.carFlow have been build)
         @MODIFIES:None
         @EFFECTS:返回出租车即将走向的下一个路口编号
         */
+        //---------------------------//
+        //assert Main.carFlow.repOk();
+        //---------------------------//
         List<Integer> ableChoice = new ArrayList<>();
         if(currentRow-1>=0 && Main.matrix[currentPosition][Main.getCodeByRowCol(currentRow-1,currentCol)]) {
             ableChoice.add(Main.getCodeByRowCol(currentRow - 1, currentCol));
@@ -160,7 +172,8 @@ class CommandTaxi extends Thread implements GlobalConstant,DriveMode{
     }
     //等待服务状态
     private void carryWaitService() throws InterruptedException{
-        /*@REQUIRES:None
+        /*@REQUIRES:monitorTaxi!=null && monitorTaxi.taxiCode == this.taxiCode &&
+                    (Main.carFlow have been build)
         @MODIFIES:this.waitCount,this.monitorTaxi,this.frontPosition
         @EFFECTS:normal_behavior:线程进行模拟睡眠(先检查是否需要等待红绿灯),修改出租车的相关状态、出租车上一次所在的点、以及等待服务时间累加器的值
                  调用车流量类的方法增加以及减少相应边的流量.
@@ -177,6 +190,7 @@ class CommandTaxi extends Thread implements GlobalConstant,DriveMode{
         }
         Main.carFlow.addCarFlowAt(monitorTaxi.getCurrentRow(),monitorTaxi.getCurrentCol(),Main.getRowByCode(nextPosition),
                 Main.getColByCode(nextPosition));
+        //assert Main.redGreenLight.repOk();
         waitRedLight(nextPosition);//检查是否需要等红绿灯
         sleep((long)(gridConsume*1000));
         //设置新坐标
@@ -194,7 +208,7 @@ class CommandTaxi extends Thread implements GlobalConstant,DriveMode{
     }
     //停止状态
     private void carryStopService() throws InterruptedException{
-        /*@REQUIRES:None
+        /*@REQUIRES:monitorTaxi!=null && monitorTaxi.taxiCode == this.taxiCode
         @MODIFIES:this.monitorTaxi
         @EFFECTS:睡眠1s,修改出租车状态为等待服务状态
                 Thread.sleep()出现异常==>exceptional_behavior(InterruptedException) throw it.
@@ -204,7 +218,7 @@ class CommandTaxi extends Thread implements GlobalConstant,DriveMode{
     }
     //接客路途,最终状态改为IN_SERVICE
     private void carryGrabService() throws InterruptedException{
-        /*@REQUIRES:None
+        /*@REQUIRES:monitorTaxi!=null && monitorTaxi.taxiCode == this.taxiCode && Main.safeFilePassenger有效
         @MODIFIES:this.waitCount,this.monitorTaxi
         @EFFECTS:normal_behavior:waitCount清零,等待20s睡眠状态取消,调用Main.getShortestPath获得最短路径,提交给driveByShortestPath执行
                                  最短路径,执行完将处理信息一方面交给终端，一方面提交给文件输出流(调用相关方法实现)
@@ -234,7 +248,8 @@ class CommandTaxi extends Thread implements GlobalConstant,DriveMode{
     }
     //服务状态
     private void carryInService() throws InterruptedException{
-        /*@REQUIRES:None
+        /*@REQUIRES:monitorTaxi!=null && monitorTaxi.taxiCode == this.taxiCode &&
+                    Main.safeFilePassenger有效
         @MODIFIES:this.monitorTaxi
         @EFFECTS:normal_behavior:调用Main.getShortestPath获得最短路径,提交给driveByShortestPath执行最短路径,
                  执行完将处理信息一方面交给终端，一方面提交给文件输出流(调用相关类的方法实现),到达乘客所在地,睡眠1s
@@ -252,12 +267,15 @@ class CommandTaxi extends Thread implements GlobalConstant,DriveMode{
         monitorTaxi.setCurrentStatus(WAIT_SERVICE);//重新设置为等待服务状态
         //输出实际行驶路径到文件和控制台
         Main.outPutInfoToTerminal(info);
+        /*assert Main.safeFileRequest.repOk();
+        assert Main.safeFilePassenger.repOk();*/
         Main.safeFilePassenger.writeToFile(allocRequest.toHashString(),info);
         Main.safeFilePassenger.outPutToFile(allocRequest.toHashString());
     }
     //为了避免代码冗余设计,在执行接客以及服务时走最短路径
     private String driveByShortestPath(List<Integer> shortestPath) throws InterruptedException{
-        /*@REQUIRES:shortestPath.size>=3 && (\all 0<=shortestPath.get(i)<=6399 for 1<=i<=shortestPath.size-1)
+        /*@REQUIRES:shortestPath.size>=3 && (\all 0<=shortestPath.get(i)<=6399 for 1<=i<=shortestPath.size-1) &&
+                    monitorTaxi!=null && monitorTaxi.taxiCode == this.taxiCode && Main.carFlow有效
         @MODIFIES:shortestPath,this.monitorTaxi,checkRoadChange
         @EFFECTS:normal_behavior:如果中途不出现改路的情况，按照最短路径集逐个走下去(修改出租车位置,调用车流量监控类修改流量,模拟睡眠)
                                 如果出现改路,重新规划,并把checkRoadChange置为false,避免重复规划路径
@@ -271,6 +289,9 @@ class CommandTaxi extends Thread implements GlobalConstant,DriveMode{
             firstSleep = 0;
         int position;
         for(int i=shortestPath.size()-2;i>0;i--){
+            //-----------------------------------//
+            //assert Main.carFlow.repOk();
+            //----------------------------------//
             position = shortestPath.get(i);
             if(checkRoadChange){
                 checkRoadChange = false;
@@ -295,7 +316,7 @@ class CommandTaxi extends Thread implements GlobalConstant,DriveMode{
     }
     //@Overview:design for checking whether needs to wait for red light
     private void waitRedLight(int nextPosition) throws InterruptedException{
-        /*@REQUIRES:0<=nextPosition=6399
+        /*@REQUIRES:0<=nextPosition=6399 && Main.redGreenLight有效
         @EFFECTS:根据出租车之前的位置,现在的位置,下一步要去的位置并根据当前路口是否有红绿灯以及红绿灯的状态
         判断出租车是否需要等待红灯进入睡眠(调用红绿灯类中的方法获得需要睡眠多长时间).
         睡眠出错==>exception_behavior:(InterruptedException)throw it.

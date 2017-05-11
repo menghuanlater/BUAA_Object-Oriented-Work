@@ -86,6 +86,22 @@ public class Main implements GlobalConstant{
             redGreenLight.start();
             //循环判断输入何时结束
             while (requestInput.getState() != Thread.State.TERMINATED) {//输入结束,下面去判断所有出租车的状态
+                /*//-----------------------------------------------//
+                assert mapLightHandler.repOk();
+                assert prQueue.repOk();
+                assert srQueue.repOk();
+                assert rrQueue.repOk();
+                assert requestInput.repOk();
+                assert dealSearch.repOk();
+                assert dealPassenger.repOk();
+                assert dealRoad.repOk();
+                assert redGreenLight.repOk();
+                for(int i=0;i<SUM_CARS;i++){
+                    assert taxiSets[i].repOk();
+                    assert commandTaxis[i].repOk();
+                }
+                assert Main.repOk();
+                //-----------------------------------------------//*/
                 Thread.sleep(5000);//不需要一直去扫描,尽量不占用太多的CPU资源
             }
             //首先终止非出租车线程
@@ -125,6 +141,21 @@ public class Main implements GlobalConstant{
             for (int i = 0; i < SUM_CARS; i++)
                 commandTaxis[i].stop();
             System.out.println("All thread have exist successfully!");
+            /*//-----------------------------------------------//
+            assert mapLightHandler.repOk();
+            assert prQueue.repOk();
+            assert srQueue.repOk();
+            assert rrQueue.repOk();
+            assert requestInput.repOk();
+            assert dealSearch.repOk();
+            assert dealPassenger.repOk();
+            assert dealRoad.repOk();
+            assert redGreenLight.repOk();
+            for(int i=0;i<SUM_CARS;i++){
+                assert taxiSets[i].repOk();
+                assert commandTaxis[i].repOk();
+            }
+            //-----------------------------------------------//*/
         }catch (IOException | InterruptedException e){
             e.printStackTrace();
         }
@@ -274,7 +305,7 @@ public class Main implements GlobalConstant{
     }
     //修改车流量数组以及路径邻接矩阵(关路与开路)
     static synchronized void modifyRoad(List<RoadRequest> list){
-        /*@REQUIRES:list.size()>0;
+        /*@REQUIRES:list.size()>0 && \all list.get(i).legacy==true,0<=i<list.size()
         @MODIFIES:matrix[][]
         @EFFECTS:根据道路修改指令,关闭或打开某些路,通知相关出租车重新规划路径,调用相关类方法修改流量、决断是否关闭红绿灯
         @THREAD_REQUIRES:\locked(matrix[][])
@@ -310,7 +341,7 @@ public class Main implements GlobalConstant{
     //输出信息到终端,但是为了避免多个线程输出信息的紊乱杂糅,一次只能输出一个
     static void outPutInfoToTerminal(String info){
         /*@REQUIRES:info!=null
-        @MODIFIES:System.out
+        @MODIFIES:System.out(按照gui里面的JSF注释写的)
         @EFFECTS:调用Lock的方法加锁,输出信息到终端,调用Lock的方法释放锁
         @THREAD_REQUIRES:None
         @THREAD_EFFECTS:None.   (锁机制由自定义锁完成互斥)
@@ -320,16 +351,17 @@ public class Main implements GlobalConstant{
         lock.unlock();
     }
     /*@repOk.
-    //检查需要在Main函数启动后检查,否则检查没有任何意义.
+    //检查需要在main函数启动后检查,否则检查没有任何意义(Main函数启动后存在对象实例化--->数组实例化,对其检查主要是针对数组中的元素有没有
+    实例化,不启动main函数,Main类是repOk() false.).
     check:1.\all matrix[i][j] == matrix[j][i] && matrixInit[i][j] == matrixInit[j][i] &&
         (if matrixInit[i][j]==false ==> matrix[i][j]==false) ,0<=i,j<=6399
     2.\all matrixGui[i][j] is in {0,1,2,3}, 0<=i,j<=6399
-    3.startTime>0 && \all taxiSets[i]!=null && taxiSets[i].taxiCode = i && commandTaxis[i]!=null
+    3.startTime>=0 && \all taxiSets[i]!=null && taxiSets[i].taxiCode = i && commandTaxis[i]!=null
         && commandTaxis[i]!=null
-    4.其他成员变量无需检查(final的存在等原因)
+    4.其他成员变量无需检查(final的存在等原因)为算最短路径做准备的几个静态变量完全可以转成函数局部变量,无需检查,只是避免重复申请空间
      */
-    public boolean repOk(){
-        /*
+    public static boolean repOk(){
+        /*@REQUIRES:have start the Main.
         @EFFECTS:\result = invariant(this)
          */
         //check 1
@@ -351,7 +383,7 @@ public class Main implements GlobalConstant{
             }
         }
         //check 3
-        if(startTime<=0) return false;
+        if(startTime<0) return false;
         for(int i=0;i<SUM_CARS;i++)
             if(taxiSets[i]==null || commandTaxis[i]==null || taxiSets[i].getTaxiCode()!=i)
                 return false;

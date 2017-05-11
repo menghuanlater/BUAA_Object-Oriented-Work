@@ -10,7 +10,7 @@ public class MonitorCarFlow implements GlobalConstant{
     */
     private final int carFlow[] = new int[EDGE_NUM];
     /*@repOk.
-    check:\all carFlow[i]>=0
+    check:\all carFlow[i]>=0,0<=i<EDGE_NUM
     */
     public boolean repOk(){
         /*
