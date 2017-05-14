@@ -208,11 +208,13 @@ public class CommandTaxi extends Thread implements GlobalConstant,DriveMode{
     }
     //停止状态
     private void carryStopService() throws InterruptedException{
-        /*@REQUIRES:monitorTaxi!=null && monitorTaxi.taxiCode == this.taxiCode
+        /*@REQUIRES:monitorTaxi!=null && monitorTaxi.taxiCode == this.taxiCode && Main.carFlow有效
         @MODIFIES:this.monitorTaxi
-        @EFFECTS:睡眠1s,修改出租车状态为等待服务状态
+        @EFFECTS:睡眠1s后修改出租车状态为等待服务状态,减掉睡眠之前走过的边的流量
                 Thread.sleep()出现异常==>exceptional_behavior(InterruptedException) throw it.
         */
+        Main.carFlow.subCarFlowAt(monitorTaxi.getCurrentRow(),monitorTaxi.getCurrentCol(),Main.getRowByCode(frontPosition),
+                Main.getColByCode(frontPosition));//减少流量
         sleep((long)(stopInterval*1000));
         monitorTaxi.setCurrentStatus(WAIT_SERVICE);
     }
