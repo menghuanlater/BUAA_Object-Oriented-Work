@@ -36,6 +36,10 @@ public class PassengerRequest implements GlobalConstant{
             this.legacy = false;
         else{
             try {
+            if(src.charAt(0)!='('||src.charAt(src.length()-1)!=')' || dst.charAt(0)!='(' || dst.charAt(dst.length()-1)!=')'){
+                this.legacy = false;
+                return;
+            }    
             String srcArg[] = src.substring(1,src.length()-1).split(",");
             String dstArg[] = dst.substring(1,dst.length()-1).split(",");
             if(srcArg.length!=2 || dstArg.length!=2)
