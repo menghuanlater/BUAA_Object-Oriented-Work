@@ -36,6 +36,10 @@ public class RoadRequest implements GlobalConstant{
             this.legacy = false;
         else {
             try {
+                if(first.charAt(0)!='('||first.charAt(first.length()-1)!=')' || next.charAt(0)!='(' || next.charAt(next.length()-1)!=')'){
+                    this.legacy = false;
+                    return;
+                }
                 String firstArg[] = first.substring(1, first.length() - 1).split(",");
                 String nextArg[] = next.substring(1, next.length() - 1).split(",");
                 if (firstArg.length != 2 || nextArg.length != 2)
