@@ -149,7 +149,7 @@ class ALSDispatcher extends Dispatcher implements ElevatorConstant {
             return false;
         for(int loopStart = requestQueue.getIndexOfFetch();loopStart<requestQueue.getSizeOfQueue();loopStart++) {
             SingleRequest targetRequest = requestQueue.getRequestAt(loopStart);
-            if(targetRequest.getRequestTime()>myElevator.getCompleteTime()-openCloseInterval)
+            if(targetRequest.getRequestTime()>=myElevator.getCompleteTime()-openCloseInterval)
                 break;
             if(targetRequest.getRequestType()==INNER_REQUEST && (elevatorStatus==STATUS_UP &&
                     targetRequest.getTargetFloor()>objRequest.getTargetFloor() || elevatorStatus==STATUS_DOWN &&
