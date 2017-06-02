@@ -49,6 +49,8 @@ public void testCheckSameRequest() throws Exception {
     RequestQueue testQueue = new RequestQueue();
     //加入一系列合法的请求(整体全覆盖性测试)
     SingleRequest a1 = new SingleRequest("(FR,1,UP,0)",0);
+    SingleRequest a15 = new SingleRequest("(ER,5,1)",0);
+    SingleRequest a16 = new SingleRequest("(FR,5,UP,1)",1);
     SingleRequest a2 = new SingleRequest("(ER,8,1)",0);
     SingleRequest a3 = new SingleRequest("(ER,8,1)",1);
     SingleRequest a4 = new SingleRequest("(ER,8,2)",1);
@@ -57,13 +59,15 @@ public void testCheckSameRequest() throws Exception {
     SingleRequest a7 = new SingleRequest("(ER,8,3)",3);
     SingleRequest a8 = new SingleRequest("(FR,9,UP,7)",3);
     SingleRequest a9 = new SingleRequest("(FR,9,DOWN,8)",7);
-    SingleRequest a10 = new SingleRequest("(ER,8,20)",8);
-    SingleRequest a11 = new SingleRequest("(FR,9,UP,20)",20);
-    SingleRequest a12 = new SingleRequest("(FR,9,DOWN,20)",20);
-    SingleRequest a13 = new SingleRequest("(FR,9,UP,21)",20);
-    SingleRequest a14 = new SingleRequest("(FR,9,DOWN,21)",21);
+    SingleRequest a10 = new SingleRequest("(ER,8,30)",8);
+    SingleRequest a11 = new SingleRequest("(FR,9,UP,30)",30);
+    SingleRequest a12 = new SingleRequest("(FR,9,DOWN,30)",30);
+    SingleRequest a13 = new SingleRequest("(FR,9,UP,31)",30);
+    SingleRequest a14 = new SingleRequest("(FR,9,DOWN,31)",31);
     //应当被清除的请求:a3,a4,a7,a8,a9,a13,a14
     testQueue.addRequest(a1);
+    testQueue.addRequest(a15);
+    testQueue.addRequest(a16);
     testQueue.addRequest(a2);
     testQueue.addRequest(a3);
     testQueue.addRequest(a4);
@@ -77,7 +81,9 @@ public void testCheckSameRequest() throws Exception {
     testQueue.addRequest(a12);
     testQueue.addRequest(a13);
     testQueue.addRequest(a14);
+
     Dispatcher dispatcher = new Dispatcher(testQueue);
+    dispatcher.checkSameRequest(0,1,null);
     dispatcher.checkSameRequest(1,1,a1);//不应该删除任何一个请求
     Assert.assertEquals(testQueue.isContain(a1),true);
     Assert.assertEquals(testQueue.isContain(a2),true);
@@ -93,8 +99,46 @@ public void testCheckSameRequest() throws Exception {
     Assert.assertEquals(testQueue.isContain(a12),true);
     Assert.assertEquals(testQueue.isContain(a13),true);
     Assert.assertEquals(testQueue.isContain(a14),true);
+    Assert.assertEquals(testQueue.isContain(a15),true);
+    Assert.assertEquals(testQueue.isContain(a16),true);
 
-    dispatcher.checkSameRequest(2,5.5,a2);
+    dispatcher.checkSameRequest(2,4,a15);//不应该删除任何一个请求
+    Assert.assertEquals(testQueue.isContain(a1),true);
+    Assert.assertEquals(testQueue.isContain(a2),true);
+    Assert.assertEquals(testQueue.isContain(a3),true);
+    Assert.assertEquals(testQueue.isContain(a4),true);
+    Assert.assertEquals(testQueue.isContain(a5),true);
+    Assert.assertEquals(testQueue.isContain(a6),true);
+    Assert.assertEquals(testQueue.isContain(a7),true);
+    Assert.assertEquals(testQueue.isContain(a8),true);
+    Assert.assertEquals(testQueue.isContain(a9),true);
+    Assert.assertEquals(testQueue.isContain(a10),true);
+    Assert.assertEquals(testQueue.isContain(a11),true);
+    Assert.assertEquals(testQueue.isContain(a12),true);
+    Assert.assertEquals(testQueue.isContain(a13),true);
+    Assert.assertEquals(testQueue.isContain(a14),true);
+    Assert.assertEquals(testQueue.isContain(a15),true);
+    Assert.assertEquals(testQueue.isContain(a16),true);
+
+    dispatcher.checkSameRequest(3,4,a16);//不应该删除任何一个请求
+    Assert.assertEquals(testQueue.isContain(a1),true);
+    Assert.assertEquals(testQueue.isContain(a2),true);
+    Assert.assertEquals(testQueue.isContain(a3),true);
+    Assert.assertEquals(testQueue.isContain(a4),true);
+    Assert.assertEquals(testQueue.isContain(a5),true);
+    Assert.assertEquals(testQueue.isContain(a6),true);
+    Assert.assertEquals(testQueue.isContain(a7),true);
+    Assert.assertEquals(testQueue.isContain(a8),true);
+    Assert.assertEquals(testQueue.isContain(a9),true);
+    Assert.assertEquals(testQueue.isContain(a10),true);
+    Assert.assertEquals(testQueue.isContain(a11),true);
+    Assert.assertEquals(testQueue.isContain(a12),true);
+    Assert.assertEquals(testQueue.isContain(a13),true);
+    Assert.assertEquals(testQueue.isContain(a14),true);
+    Assert.assertEquals(testQueue.isContain(a15),true);
+    Assert.assertEquals(testQueue.isContain(a16),true);
+
+    dispatcher.checkSameRequest(4,6.5,a2);
     //a3,a4,a7被删除
     Assert.assertEquals(testQueue.isContain(a1),true);
     Assert.assertEquals(testQueue.isContain(a2),true);
@@ -110,8 +154,10 @@ public void testCheckSameRequest() throws Exception {
     Assert.assertEquals(testQueue.isContain(a12),true);
     Assert.assertEquals(testQueue.isContain(a13),true);
     Assert.assertEquals(testQueue.isContain(a14),true);
+    Assert.assertEquals(testQueue.isContain(a15),true);
+    Assert.assertEquals(testQueue.isContain(a16),true);
 
-    dispatcher.checkSameRequest(3,7.0,a5);
+    dispatcher.checkSameRequest(5,8.0,a5);
     //a8被删
     Assert.assertEquals(testQueue.isContain(a1),true);
     Assert.assertEquals(testQueue.isContain(a2),true);
@@ -127,8 +173,10 @@ public void testCheckSameRequest() throws Exception {
     Assert.assertEquals(testQueue.isContain(a12),true);
     Assert.assertEquals(testQueue.isContain(a13),true);
     Assert.assertEquals(testQueue.isContain(a14),true);
+    Assert.assertEquals(testQueue.isContain(a15),true);
+    Assert.assertEquals(testQueue.isContain(a16),true);
 
-    dispatcher.checkSameRequest(4,8,a6);
+    dispatcher.checkSameRequest(6,9,a6);
     //a9被删
     Assert.assertEquals(testQueue.isContain(a1),true);
     Assert.assertEquals(testQueue.isContain(a2),true);
@@ -144,8 +192,10 @@ public void testCheckSameRequest() throws Exception {
     Assert.assertEquals(testQueue.isContain(a12),true);
     Assert.assertEquals(testQueue.isContain(a13),true);
     Assert.assertEquals(testQueue.isContain(a14),true);
+    Assert.assertEquals(testQueue.isContain(a15),true);
+    Assert.assertEquals(testQueue.isContain(a16),true);
 
-    dispatcher.checkSameRequest(5,21.5,a10);
+    dispatcher.checkSameRequest(7,31.5,a10);
     //没有被删
     Assert.assertEquals(testQueue.isContain(a1),true);
     Assert.assertEquals(testQueue.isContain(a2),true);
@@ -161,8 +211,10 @@ public void testCheckSameRequest() throws Exception {
     Assert.assertEquals(testQueue.isContain(a12),true);
     Assert.assertEquals(testQueue.isContain(a13),true);
     Assert.assertEquals(testQueue.isContain(a14),true);
+    Assert.assertEquals(testQueue.isContain(a15),true);
+    Assert.assertEquals(testQueue.isContain(a16),true);
 
-    dispatcher.checkSameRequest(6,23.0,a11);
+    dispatcher.checkSameRequest(8,33.0,a11);
     //a13被删
     Assert.assertEquals(testQueue.isContain(a1),true);
     Assert.assertEquals(testQueue.isContain(a2),true);
@@ -178,8 +230,10 @@ public void testCheckSameRequest() throws Exception {
     Assert.assertEquals(testQueue.isContain(a12),true);
     Assert.assertEquals(testQueue.isContain(a13),false);
     Assert.assertEquals(testQueue.isContain(a14),true);
+    Assert.assertEquals(testQueue.isContain(a15),true);
+    Assert.assertEquals(testQueue.isContain(a16),true);
 
-    dispatcher.checkSameRequest(7,24.0,a12);
+    dispatcher.checkSameRequest(9,34.0,a12);
     //a14被删
     Assert.assertEquals(testQueue.isContain(a1),true);
     Assert.assertEquals(testQueue.isContain(a2),true);
@@ -195,8 +249,10 @@ public void testCheckSameRequest() throws Exception {
     Assert.assertEquals(testQueue.isContain(a12),true);
     Assert.assertEquals(testQueue.isContain(a13),false);
     Assert.assertEquals(testQueue.isContain(a14),false);
+    Assert.assertEquals(testQueue.isContain(a15),true);
+    Assert.assertEquals(testQueue.isContain(a16),true);
 
-    Assert.assertEquals(testQueue.getSizeOfQueue(),7);
+    Assert.assertEquals(testQueue.getSizeOfQueue(),9);
 } 
 
 

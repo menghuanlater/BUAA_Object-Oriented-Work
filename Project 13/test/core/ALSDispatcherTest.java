@@ -347,7 +347,7 @@ public void testPickDirectRequest() throws Exception {
     test.setCompleteRequest(new SingleRequest("(ER,7,0)",0));
     test.setCompleteTime();test.setMoveDire();
     SingleRequest a10 = new SingleRequest("(ER,5,1)",0);
-    testQueue.addRequest(a10);
+    testQueue.addRequest(a10);testQueue.addRequest(new SingleRequest("(ER,8,1)",0));
     Assert.assertEquals(testALSD.pickDirectRequest(),true);
     Assert.assertEquals(testQueue.isContain(a10),false);
     Assert.assertEquals(bao.toString().equals("[ER,5,1] / (5,UP,2.0)"+lineSeparator),true);
@@ -364,7 +364,7 @@ public void testPickDirectRequest() throws Exception {
     test.setCompleteRequest(new SingleRequest("(ER,7,0)",0));
     test.setCompleteTime();test.setMoveDire();
     SingleRequest a11 = new SingleRequest("(FR,5,UP,1)",0);
-    testQueue.addRequest(a11);
+    testQueue.addRequest(a11);testQueue.addRequest(new SingleRequest("(FR,3,DOWN,1)",1));
     Assert.assertEquals(testALSD.pickDirectRequest(),true);
     Assert.assertEquals(testQueue.isContain(a11),false);
     Assert.assertEquals(bao.toString().equals("[FR,5,UP,1] / (5,UP,2.0)"+lineSeparator),true);
@@ -386,7 +386,7 @@ public void testPickDirectRequest() throws Exception {
     Assert.assertEquals(testQueue.isContain(a10),true);
     Assert.assertEquals(testQueue.isContain(a11),true);
     bao.reset();
-    //5.存在且>1个可直接捎带,有两个并列的最优
+    //5.存在且>1个可直接捎带,有两个并列的最优,先选择ER,后选择FR
     testQueue = new RequestQueue();
     testALSD = new ALSDispatcher(testQueue);
     test = testALSD.getMyElevator();
@@ -396,6 +396,17 @@ public void testPickDirectRequest() throws Exception {
     Assert.assertEquals(testALSD.pickDirectRequest(),true);
     Assert.assertEquals(bao.toString().equals("[ER,5,1] / (5,UP,2.0)"+lineSeparator+
             "[FR,5,UP,1] / (5,UP,2.0)"+lineSeparator),true);
+    bao.reset();
+    //6.存在且>1个可直接捎带,有两个并列的最优,先选择FR,后选择ER
+    testQueue = new RequestQueue();
+    testALSD = new ALSDispatcher(testQueue);
+    test = testALSD.getMyElevator();
+    test.setCompleteRequest(new SingleRequest("(ER,7,0)",0));
+    test.setCompleteTime();test.setMoveDire();
+    testQueue.addRequest(a11);testQueue.addRequest(a10);
+    Assert.assertEquals(testALSD.pickDirectRequest(),true);
+    Assert.assertEquals(bao.toString().equals("[FR,5,UP,1] / (5,UP,2.0)"+lineSeparator+
+            "[ER,5,1] / (5,UP,2.0)"+lineSeparator),true);
     bao.reset();
 
     //电梯状态为DOWN,预设电梯从10层去往4层
@@ -433,39 +444,39 @@ public void testPickDirectRequest() throws Exception {
     testQueue = new RequestQueue();
     testALSD = new ALSDispatcher(testQueue);
     test = testALSD.getMyElevator();
-    test.setCompleteRequest(new SingleRequest("(ER,10,0)",0));
+    test.setCompleteRequest(new SingleRequest("(ER,9,0)",0));
     test.setCompleteTime();test.setMoveDire();
     test.setCompleteRequest(new SingleRequest("(ER,4,20)",0));
     test.setCompleteTime();test.setMoveDire();
     a10 = new SingleRequest("(ER,6,21)",20);
-    testQueue.addRequest(a10);
+    testQueue.addRequest(a10);testQueue.addRequest(new SingleRequest("(ER,2,21)",21));
     Assert.assertEquals(testALSD.pickDirectRequest(),true);
     Assert.assertEquals(testQueue.isContain(a10),false);
-    Assert.assertEquals(bao.toString().equals("[ER,6,21] / (6,DOWN,22.0)"+lineSeparator),true);
+    Assert.assertEquals(bao.toString().equals("[ER,6,21] / (6,DOWN,21.5)"+lineSeparator),true);
     bao.reset();
     Assert.assertEquals(test.getStartFloor(),6);
     Assert.assertEquals(test.getMoveDire(),STATUS_DOWN);
-    Assert.assertEquals(Math.abs(test.getStartTime()-23.0)<0.0001,true);
-    Assert.assertEquals(Math.abs(test.getCompleteTime()-25.0)<0.0001,true);
+    Assert.assertEquals(Math.abs(test.getStartTime()-22.5)<0.0001,true);
+    Assert.assertEquals(Math.abs(test.getCompleteTime()-24.5)<0.0001,true);
 
     //3.存在可直接捎带,且只有一个为FR
     testQueue = new RequestQueue();
     testALSD = new ALSDispatcher(testQueue);
     test = testALSD.getMyElevator();
-    test.setCompleteRequest(new SingleRequest("(ER,10,0)",0));
+    test.setCompleteRequest(new SingleRequest("(ER,9,0)",0));
     test.setCompleteTime();test.setMoveDire();
     test.setCompleteRequest(new SingleRequest("(ER,4,20)",0));
     test.setCompleteTime();test.setMoveDire();
     a11 = new SingleRequest("(FR,6,DOWN,21)",20);
-    testQueue.addRequest(a11);
+    testQueue.addRequest(a11);testQueue.addRequest(new SingleRequest("(FR,2,DOWN,21)",21));
     Assert.assertEquals(testALSD.pickDirectRequest(),true);
     Assert.assertEquals(testQueue.isContain(a11),false);
-    Assert.assertEquals(bao.toString().equals("[FR,6,DOWN,21] / (6,DOWN,22.0)"+lineSeparator),true);
+    Assert.assertEquals(bao.toString().equals("[FR,6,DOWN,21] / (6,DOWN,21.5)"+lineSeparator),true);
     bao.reset();
     Assert.assertEquals(test.getStartFloor(),6);
     Assert.assertEquals(test.getMoveDire(),STATUS_DOWN);
-    Assert.assertEquals(Math.abs(test.getStartTime()-23.0)<0.0001,true);
-    Assert.assertEquals(Math.abs(test.getCompleteTime()-25.0)<0.0001,true);
+    Assert.assertEquals(Math.abs(test.getStartTime()-22.5)<0.0001,true);
+    Assert.assertEquals(Math.abs(test.getCompleteTime()-24.5)<0.0001,true);
     //4.存在且>1个可直接捎带,只有一个最优
     testQueue = new RequestQueue();
     testALSD = new ALSDispatcher(testQueue);
@@ -493,6 +504,19 @@ public void testPickDirectRequest() throws Exception {
     Assert.assertEquals(testALSD.pickDirectRequest(),true);
     Assert.assertEquals(bao.toString().equals("[ER,6,21] / (6,DOWN,22.0)"+lineSeparator+
             "[FR,6,DOWN,21] / (6,DOWN,22.0)"+lineSeparator),true);
+    bao.reset();
+    //6.存在且>1个可直接捎带,有两个并列的最优,先选择FR,后选择ER
+    testQueue = new RequestQueue();
+    testALSD = new ALSDispatcher(testQueue);
+    test = testALSD.getMyElevator();
+    test.setCompleteRequest(new SingleRequest("(ER,10,0)",0));
+    test.setCompleteTime();test.setMoveDire();
+    test.setCompleteRequest(new SingleRequest("(ER,4,20)",0));
+    test.setCompleteTime();test.setMoveDire();
+    testQueue.addRequest(a11);testQueue.addRequest(a10);
+    Assert.assertEquals(testALSD.pickDirectRequest(),true);
+    Assert.assertEquals(bao.toString().equals("[FR,6,DOWN,21] / (6,DOWN,22.0)"+lineSeparator+
+            "[ER,6,21] / (6,DOWN,22.0)"+lineSeparator),true);
     bao.reset();
 
     //存在可直接捎带,但是与主请求楼层一致,状态重设不应该执行
